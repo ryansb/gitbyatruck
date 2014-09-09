@@ -39,6 +39,7 @@ class Change(Base):
     __tablename__ = 'change'
     id = Column(Integer, primary_key=True)
     short_hash = Column(String(8))
+    commit_time = Column(Integer)
     changed_file = Column(Integer, ForeignKey('file.id'))
     committer = Column(Integer, ForeignKey('committer.id'))
     added = Column(Integer)

@@ -2,9 +2,9 @@
 # Author: Ryan Brown <sb@ryansb.com>
 # License: Affero GPLv3
 
-import pygit2
-
 from functools import lru_cache
+
+import pygit2
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -21,11 +21,11 @@ def stat_diff(repo, commit, rid, session=None):
     diff = None
     try:
         diff = repo.diff(commit.hex, commit.hex + '^', context_lines=0)
-    except Exception as e:
+    except:
         print("Problem diffing {} against its parents. {}".format(
             commit.hex, commit.parent_ids))
-
         return
+
     if session is None:
         session = Session()
     author = author_id(session, _fullname(commit.author))
@@ -40,6 +40,7 @@ def stat_diff(repo, commit, rid, session=None):
         c = Change(
             short_hash=short,
             changed_file=fid,
+            commit_time=commit.commit_time,
             committer=author,
             added=patch.additions,
             deleted=patch.deletions)
@@ -116,4 +117,8 @@ def stats_for_repo(repo):
     session = Session()
 
     for commit in walker:
-        stat_diff(repo, commit, rid=repo_id(session, repo.path[:-6]), session=session)
+        stat_diff(repo,
+                  commit,
+                  rid=repo_id(session, repo.path[:-6]),
+                  session=session,
+                  )
