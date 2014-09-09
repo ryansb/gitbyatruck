@@ -54,12 +54,11 @@ def _fullname(author):
     )
 
 
-@lru_cache(maxsize=1024)
+@lru_cache(maxsize=4096)
 def author_id(session, fullname):
     return _find_or_create_author(session, fullname).id
 
 
-@lru_cache(maxsize=1024)
 def _find_or_create_author(session, fullname):
     user = session.query(Committer).filter_by(name=fullname).first()
     if not user:
@@ -71,7 +70,7 @@ def _find_or_create_author(session, fullname):
     return user
 
 
-@lru_cache(maxsize=4096)
+@lru_cache(maxsize=8192)
 def file_id(session, name, rid):
     f = find_or_create_file(session, name, rid)
     return f.id
