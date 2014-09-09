@@ -30,6 +30,8 @@ def stat_diff(repo, commit, rid, session=None):
         session = Session()
     author = author_id(session, _fullname(commit.author))
     for patch in diff:
+        if not (patch.additions + patch.deletions):
+            continue
         if patch.new_file_path != patch.old_file_path:
             print("Path change! we don't handle those")
         path = patch.new_file_path or patch.old_file_path
