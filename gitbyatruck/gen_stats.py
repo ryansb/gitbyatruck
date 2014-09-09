@@ -18,12 +18,14 @@ def stat_diff(repo, commit, rid, session=None):
     if not commit.parent_ids:
         return
     short = commit.hex[:8]
+    diff = None
     try:
         diff = repo.diff(commit.hex, commit.hex + '^', context_lines=0)
     except Exception as e:
         print("Problem diffing {} against its parents. {}".format(
             commit.hex, commit.parent_ids))
-        raise e
+
+        return
     if session is None:
         session = Session()
     author = author_id(session, _fullname(commit.author))
