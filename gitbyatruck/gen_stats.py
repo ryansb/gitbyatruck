@@ -54,7 +54,7 @@ def hex_generator(repo):
         yield c.hex
 
 
-def stats_for_repo(repo):
+def ingest_repo(repo):
     walker = repo.walk(repo.head.get_object().hex, pygit2.GIT_SORT_TIME)
     session = Session()
 
@@ -64,3 +64,8 @@ def stats_for_repo(repo):
                   rid=repo_id(session, repo.path[:-6]),
                   session=session,
                   )
+
+def knowledge_estimate(repo):
+    session = Session()
+    rid = repo_id(session, repo.path[:-6])
+    pass
