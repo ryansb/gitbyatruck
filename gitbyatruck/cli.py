@@ -16,10 +16,13 @@ def cli():
 
 @cli.command(short_help="Make a new course site from scratch")
 @click.option("--repo-path", help="Path to repo")
-@click.option("--drop", is_flag=True, help="Drop the tables like a pound of bacon")
+@click.option("--drop", is_flag=True,
+              help="Drop the tables like a pound of bacon")
 @click.option("--no-ingest", is_flag=True, help="Skip ingesting the repo")
 def new(repo_path, drop, no_ingest):
-    if drop: create_tables()
+    if drop:
+        create_tables()
+
     if not repo_path:
         repo_path = '/home/ryansb/code/hflossk/'
 
