@@ -2,10 +2,13 @@
 # Author: Ryan Brown <sb@ryansb.com>
 # License: Affero GPLv3
 
-from sqlalchemy import Integer, String, ForeignKey, Column, UnicodeText, Boolean
+import os
+
+from sqlalchemy import Integer, String, ForeignKey, Column, UnicodeText, Boolean, Float
 from sqlalchemy import create_engine
-from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+from sqlalchemy.orm import sessionmaker
 import sqlalchemy_utils as sqa_utils
 
 
@@ -51,8 +54,8 @@ class Knol(Base):
     id = Column(Integer, primary_key=True)
     changed_file = Column(Integer, ForeignKey('file.id'))
     committer = Column(Integer, ForeignKey('committer.id'))
-    knowledge = Column(Integer)
-    unique = Column(Boolean)
+    knowledge = Column(Float)
+    individual = Column(Boolean)
 
 
 def create_tables():
