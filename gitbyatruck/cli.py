@@ -27,9 +27,10 @@ def clean():
 @click.option("--no-stats", is_flag=True,
               help="Skip calculating stats")
 @click.option("--no-ingest", is_flag=True, help="Skip ingesting the repo")
-def new(repo_path, drop, no_ingest, no_stats):
+def run(repo_path, drop, no_ingest, no_stats):
     if drop:
         create_tables()
+        click.echo(u'\u2714 Dropped and recreated tables')
 
     if not repo_path:
         repo_path = '/home/ryansb/code/hflossk/'
@@ -38,11 +39,12 @@ def new(repo_path, drop, no_ingest, no_stats):
 
     # \u2714 is a check mark
     # \u2717 is an x
-    click.echo(u'\u2714 Read repo')
+    click.echo(u'\u2714 Opened repository')
 
     if no_ingest:
         click.echo(u'\u2717 skipped ingestion')
     else:
+        click.echo(u'\u2714 reading stats')
         ingest_repo(repo)
         click.echo(u'\u2714 ingested repo stats')
 
