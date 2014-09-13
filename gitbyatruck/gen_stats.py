@@ -4,6 +4,9 @@
 
 
 import pygit2
+
+from progressbar import ProgressBar
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -56,12 +59,21 @@ def hex_generator(repo):
 
 
 def ingest_repo(repo):
+    count = 0
+    # walker has no len() :(
+    for _ in repo.walk(repo.head.get_object().hex, pygit2.GIT_SORT_TIME):
+        count += 1
+
     walker = repo.walk(repo.head.get_object().hex, pygit2.GIT_SORT_TIME)
     session = Session()
+    bar = ProgressBar(maxval=count)
 
+    bar.start()
     for commit in walker:
         stat_diff(repo,
                   commit,
                   rid=repo_id(session, repo.path[:-6]),
                   session=session,
                   )
+        bar.update(bar.currval + 1)
+    bar.finish()
