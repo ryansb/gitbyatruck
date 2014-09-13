@@ -5,7 +5,7 @@
 import click
 import pygit2
 
-from gitbyatruck.gen_stats import ingest_repo, knowledge_estimate
+from gitbyatruck.gen_stats import ingest_repo
 from gitbyatruck.models import create_tables
 
 
