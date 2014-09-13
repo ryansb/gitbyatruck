@@ -35,7 +35,8 @@ CREATE OR REPLACE FUNCTION ingest_change() RETURNS TRIGGER AS $new_change$
         IF adjustment < 0 THEN
             -- Destroy knowledge for developers who have worked on the file by destroying 
             UPDATE knol SET knowledge = knowledge * (1.0 - adjustment/knowledge)
-                WHERE changed_file = NEW.changed_file;
+                WHERE changed_file = NEW.changed_file
+                AND knowledge > 0;
             UPDATE file SET total_knowledge = total_knowledge - adjustment
                 WHERE id = NEW.changed_file;
         END IF;
