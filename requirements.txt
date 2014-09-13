@@ -1,5 +1,4 @@
 cffi>=0.8.6
-ipython[notebook]>=2.2.0
 SQLAlchemy>=0.9.7
 SQLAlchemy-Utils>=0.26.15
 psycopg2>=2.5.4
