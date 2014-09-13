@@ -14,12 +14,20 @@ def cli():
     pass
 
 
+@cli.command(short_help="Destroy database")
+def clean():
+    create_tables()
+    click.echo(u'\u2714 Dropped and recreated tables')
+
+
 @cli.command(short_help="Make a new course site from scratch")
 @click.option("--repo-path", help="Path to repo")
 @click.option("--drop", is_flag=True,
-              help="Drop the tables like a pound of bacon")
+              help="Drop and recreate tables")
+@click.option("--no-stats", is_flag=True,
+              help="Skip calculating stats")
 @click.option("--no-ingest", is_flag=True, help="Skip ingesting the repo")
-def new(repo_path, drop, no_ingest):
+def new(repo_path, drop, no_ingest, no_stats):
     if drop:
         create_tables()
 
@@ -38,5 +46,7 @@ def new(repo_path, drop, no_ingest):
         ingest_repo(repo)
         click.echo(u'\u2714 ingested repo stats')
 
-    knowledge_estimate(repo)
+    if no_stats:
+        return
+
     click.echo(u'\u2714 first knowledge estimate complete')
