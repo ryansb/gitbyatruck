@@ -29,39 +29,32 @@ CREATE OR REPLACE FUNCTION ingest_change() RETURNS TRIGGER AS $new_change$
                     TRUE
                 );
             END IF;
-            UPDATE knol SET knowledge = knowledge + adjustment
-                WHERE changed_file = NEW.changed_file
-                AND individual = FALSE;
-            if found THEN
-            ELSE
-                INSERT INTO knol(changed_file, knowledge, individual) VALUES (
-                    NEW.changed_file,
-                    adjustment,
-                    FALSE
-                );
-            END IF;
+            UPDATE file SET total_knowledge = total_knowledge + adjustment
+                WHERE id = NEW.changed_file;
         END IF;
         IF adjustment < 0 THEN
             -- Destroy knowledge for developers who have worked on the file by destroying 
             UPDATE knol SET knowledge = knowledge * (1.0 - adjustment/knowledge)
                 WHERE changed_file = NEW.changed_file;
+            UPDATE file SET total_knowledge = total_knowledge - adjustment
+                WHERE id = NEW.changed_file;
         END IF;
 
 
         -- Now for the fun part, to share knowledge with other developers
         churn = LEAST(NEW.added, NEW.deleted);
         if churn = 0 THEN
-            -- There was no churn, so we bail.
-            new_knowledge = churn * churn_constant;
-            UPDATE knol SET knowledge = knowledge - new_knowledge
-                WHERE changed_file = NEW.changed_file
-                AND committer != NEW.committer
-                AND individual = TRUE;
-            UPDATE knol SET knowledge = knowledge + new_knowledge
-                WHERE changed_file = NEW.changed_file
-                AND committer = NEW.committer;
             RETURN NULL;
         END IF;
+        -- There was no churn, so we bail.
+        new_knowledge = churn * churn_constant;
+        UPDATE knol SET knowledge = knowledge - new_knowledge
+            WHERE changed_file = NEW.changed_file
+            AND committer != NEW.committer
+            AND individual = TRUE;
+        UPDATE knol SET knowledge = knowledge + new_knowledge
+            WHERE changed_file = NEW.changed_file
+            AND committer = NEW.committer;
         RETURN NULL;
     END;
 $new_change$ LANGUAGE plpgsql;

@@ -30,7 +30,7 @@ class Repository(Base):
 class File(Base):
     __tablename__ = 'file'
     id = Column(Integer, primary_key=True)
-    name = Column(String(1024))
+    name = Column(String(1024), unique=True)
     repo = Column(Integer, ForeignKey('repo.id'))
     changes = relationship("Change")
     total_knowledge = Column(Integer)
