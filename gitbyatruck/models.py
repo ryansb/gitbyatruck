@@ -64,3 +64,9 @@ def create_tables():
     engine = create_engine(url)
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(engine, checkfirst=False)
+
+    session = sessionmaker(bind=engine)()
+
+    procedure = os.path.join(os.path.split(__file__)[0], 'procedures', 'calculate_knowledge.sql')
+    with open(procedure, 'r') as p:
+        session.execute(p.read())
