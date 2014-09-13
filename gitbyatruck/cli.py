@@ -22,14 +22,16 @@ def clean():
 
 @cli.command(short_help="Make a new course site from scratch")
 @click.option("--repo-path", help="Path to repo")
+@click.option("--db-url", help="Postgres DB connection string like"
+              " 'postgres://gitter@127.0.0.1/tgit'")
 @click.option("--drop", is_flag=True,
               help="Drop and recreate tables")
 @click.option("--no-stats", is_flag=True,
               help="Skip calculating stats")
 @click.option("--no-ingest", is_flag=True, help="Skip ingesting the repo")
-def run(repo_path, drop, no_ingest, no_stats):
+def run(repo_path, drop, no_ingest, no_stats, db_url):
     if drop:
-        create_tables()
+        create_tables(db_url)
         click.echo(u'\u2714 Dropped and recreated tables')
 
     if not repo_path:
@@ -45,7 +47,7 @@ def run(repo_path, drop, no_ingest, no_stats):
         click.echo(u'\u2717 skipped ingestion')
     else:
         click.echo(u'\u2714 reading stats')
-        ingest_repo(repo)
+        ingest_repo(repo, db_url)
         click.echo(u'\u2714 ingested repo stats')
 
     if no_stats:

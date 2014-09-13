@@ -11,3 +11,5 @@ Note: this is developed for Python 3.3+. If you don't have that, good luck.
 1. Follow the [pygit2 instructions](http://www.pygit2.org/install.html) to get
    the libgit C bindings
 1. Run `python setup.py install` in the `gitbyatruck` directory
+
+Bam, you're done!

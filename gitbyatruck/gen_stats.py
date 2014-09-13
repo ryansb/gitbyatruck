@@ -13,8 +13,7 @@ from sqlalchemy.orm import sessionmaker
 from gitbyatruck.models import Change
 from gitbyatruck.model_helpers import author_id, file_id, repo_id, _fullname
 
-_engine = create_engine('postgres://gitter@127.0.0.1/tgit')
-Session = sessionmaker(bind=_engine)
+Session = None
 
 
 def stat_diff(repo, commit, rid, session=None):
@@ -58,7 +57,10 @@ def hex_generator(repo):
         yield c.hex
 
 
-def ingest_repo(repo):
+def ingest_repo(repo, db_url):
+    _engine = create_engine(db_url)
+    global Session
+    Session = sessionmaker(bind=_engine)
     count = 0
     # walker has no len() :(
     for _ in repo.walk(repo.head.get_object().hex, pygit2.GIT_SORT_TIME):

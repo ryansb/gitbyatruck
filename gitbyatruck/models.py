@@ -63,9 +63,7 @@ class Knol(Base):
     individual = Column(Boolean)
 
 
-def create_tables():
-    url = 'postgres://gitter@127.0.0.1/tgit'
-
+def create_tables(url):
     engine = create_engine(url)
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(engine, checkfirst=False)
