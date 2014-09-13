@@ -4,12 +4,17 @@
 
 import os
 
-from sqlalchemy import Integer, String, ForeignKey, Column, UnicodeText, Boolean, Float
+from sqlalchemy import (Boolean,
+                        Column,
+                        Float,
+                        ForeignKey,
+                        Integer,
+                        String,
+                        text,
+                        )
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from sqlalchemy.orm import sessionmaker
-import sqlalchemy_utils as sqa_utils
 
 
 Base = declarative_base()
@@ -65,8 +70,12 @@ def create_tables():
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(engine, checkfirst=False)
 
-    session = sessionmaker(bind=engine)()
-
-    procedure = os.path.join(os.path.split(__file__)[0], 'procedures', 'calculate_knowledge.sql')
+    # load procedures
+    procedure = os.path.join(
+        os.path.split(__file__)[0],
+        'procedures',
+        'calculate_knowledge.sql',
+    )
     with open(procedure, 'r') as p:
-        session.execute(p.read())
+        proc = text(p.read())
+        engine.execute(proc)
