@@ -7,7 +7,7 @@ import pygit2
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from gitbyatruck.models import Change, File, Knol, Base
+from gitbyatruck.models import Change
 from gitbyatruck.model_helpers import author_id, file_id, repo_id, _fullname
 
 _engine = create_engine('postgres://gitter@127.0.0.1/tgit')
@@ -38,6 +38,7 @@ def stat_diff(repo, commit, rid, session=None):
         fid = file_id(session, path, rid)
 
         c = Change(
+            # non unique. One change object per file changed in a commit
             short_hash=short,
             changed_file=fid,
             commit_time=commit.commit_time,
