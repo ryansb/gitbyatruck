@@ -5,3 +5,10 @@ psycopg2>=2.5.4
 click>=3.3
 progressbar33>=2.4
 pygit2==0.21.1
+pyramid>=1.5.1
+pyramid_chameleon>=0.3
+pyramid_debugtoolbar>=2.2
+pyramid_tm>=0.7
+transaction>=1.4.3
+zope.sqlalchemy>=0.7.5
+waitress>=0.8.9
