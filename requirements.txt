@@ -12,3 +12,4 @@ pyramid_tm>=0.7
 transaction>=1.4.3
 zope.sqlalchemy>=0.7.5
 waitress>=0.8.9
+deform>=0.9.9

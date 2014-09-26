@@ -6,6 +6,7 @@ import os
 
 from sqlalchemy import (Boolean,
                         Column,
+                        DateTime,
                         Float,
                         ForeignKey,
                         Integer,
@@ -29,6 +30,10 @@ class Repository(Base):
     __tablename__ = 'repo'
     id = Column(Integer, primary_key=True)
     name = Column(String(255), unique=True)
+    clone_url = Column(String(511), unique=True)
+    disk_path = Column(String(511), unique=True)
+    created_at = Column(DateTime())
+    ttl = Column(Integer) # TTL in hours
     files = relationship("File")
 
 
