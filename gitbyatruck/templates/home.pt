@@ -17,7 +17,7 @@
         <li><i class="glyphicon glyphicon-cog icon-muted"></i><a href="/repo">Repositories</a></li>
         <li><i class="glyphicon glyphicon-globe icon-muted"></i><a href="/stats">Statistics</a></li>
         <li><i class="glyphicon glyphicon-home icon-muted"></i><a href="https://github.com/ryansb/gitbyatruck">On Github</a></li>
-      </div>
+      </ul>
     </div>
   </div>
 </html>
