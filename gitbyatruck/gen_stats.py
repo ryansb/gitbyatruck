@@ -16,7 +16,7 @@ from gitbyatruck.model_helpers import author_id, file_id, repo_id, _fullname
 Session = None
 
 
-def stat_diff(repo, commit, rid, session=None):
+def stat_diff(repo, commit, rid, session=None, fname_filter=None):
     if not commit.parent_ids:
         return
     short = commit.hex[:8]
@@ -36,7 +36,14 @@ def stat_diff(repo, commit, rid, session=None):
             continue
         if patch.new_file_path != patch.old_file_path:
             print("Path change! we don't handle those")
+
         path = patch.new_file_path or patch.old_file_path
+
+        if fname_filter is not None and fname_filter(path) is False:
+            # bail if the file isn't one we care about
+            continue
+        # otherwise keep going
+
         fid = file_id(session, path, rid)
 
         c = Change(
