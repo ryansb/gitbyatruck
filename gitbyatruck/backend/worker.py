@@ -38,8 +38,7 @@ def clone_repo(clone_url, path):
         bare=True,
     )
     log.info("Clone successful for {}".format(clone_url))
-    session = DBSession()
-    ingest_worker(repo, session)
+    ingest_worker(repo, clone_url)
     log.info("Completed repo {}".format(clone_url))
 
 
@@ -56,6 +55,7 @@ def background_ingest(clone_url):
         if repo_model is None:
             log.warning("Could not retrieve repo {}, bailing "
                         "out".format(clone_url))
+            return
 
         log.info("Starting repo name {}".format(clone_url))
         fpath = temp_path('/tmp/gitbyatruck-data')

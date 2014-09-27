@@ -4,16 +4,18 @@ from multiprocessing import Pool
 import json
 
 from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPBadRequest, HTTPAccepted, HTTPOk, HTTPNotFound
+from pyramid.httpexceptions import (
+    HTTPBadRequest,
+    HTTPAccepted,
+    HTTPOk,
+    HTTPNotFound,
+)
 
 import transaction
-from sqlalchemy.exc import DBAPIError
-from sqlalchemy import join
 import deform
 import colander
 
 from gitbyatruck.models import (
-    Change,
     Committer,
     DBSession,
     File,
@@ -36,7 +38,8 @@ class NewRepo(colander.MappingSchema):
 form_schema = NewRepo()
 
 
-@view_config(route_name='addrepo', renderer='gitbyatruck:templates/git_form.mako')
+@view_config(route_name='addrepo',
+             renderer='gitbyatruck:templates/git_form.mako')
 def add_repo(request):
     return {'title': 'Repositories',
             }
@@ -46,8 +49,8 @@ def add_repo(request):
 def start_repo(request):
     log.info("Received request {}".format(json.dumps(request.matchdict)))
 
-
-    if request.POST.get('clone_url') is None or request.POST.get('name') is None:
+    if request.POST.get('clone_url') is None or (request.POST.get('name')
+                                                 is None):
         raise HTTPBadRequest
     log.info(request.body)
 
@@ -61,7 +64,6 @@ def start_repo(request):
             # TODO: when a repo already exists, fire off a job to pull from it
             # and update stats. For now, whatever.
             return {'link': '/repo/{}'.format(r.id)}
-            raise HTTPOk
 
         # The repo hasn't already been cloned, so let's save it.
         r = Repository()
@@ -87,12 +89,17 @@ def start_repo(request):
 @view_config(route_name='jsonstats',
              renderer='json')
 def jsonify_stats(request):
-    log.info(request.matchdict['repo_id'])
-    repo = DBSession.query(Repository).filter_by(id=request.matchdict['repo_id']).first()
+    repo = DBSession.query(Repository).filter(
+        Repository.id == request.matchdict['repo_id']).first()
     if repo is None:
+        log.info("Could not find repo with ID {}".format(
+            request.matchdict['repo_id']))
         raise HTTPNotFound
 
     resp = {}
+    resp['name'] = repo.name
+    resp['clone_url'] = repo.clone_url
+
     if repo.ingest_begun_at:
         if repo.ingest_finished_at:
             # how long did the job take?
@@ -113,12 +120,15 @@ def jsonify_stats(request):
         Knol.knowledge,
         Committer.name,
         File.name,
+        Knol.repo,
     ).join(
         Committer,
         Knol.committer == Committer.id,
     ).join(
         File,
         Knol.changed_file == File.id,
+    ).filter(
+        Knol.repo == repo.id
     ).all()
 
     resp['file_listing'] = {}
