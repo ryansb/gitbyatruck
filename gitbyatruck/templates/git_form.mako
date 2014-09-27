@@ -20,12 +20,22 @@
   </div>
 </form>
 
-<script>
-$.ajax({
-    type: "POST";
-    url: "${request.route_url('addrepo')}",
-    data: JSON.stringify({clone_url: "", name: ""}),
-    contentType="application/json; charset=uft8",
-    dataType: "json"
-})
+<script type="text/javascript">
+    $("#git_repo").submit(function(event)){
+
+    /* stop form from submitting normally */
+        event.preventDefault();
+
+    /*get some values from elements on page */
+        var $form = $(this),
+            url = $form.attr('action');
+
+    /* send the data using post request */
+        var posting = $.post(url, {name: $('#name').val(), clone_url: $('#clone_url').val()});
+        
+    /* alerts the results */
+        posting.done(function(data)){
+            alert('success');
+        };
+    };
 </script>
