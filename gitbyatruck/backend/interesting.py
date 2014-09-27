@@ -48,7 +48,6 @@ def interest_callable(suffixes=None, prefixes=None, regexes=None):
         for f in fname_filters:
             if f.match(fname):
                 return True
-        log.info("Failed to match on file {}".format(fname))
         return False
 
     return checkfile
