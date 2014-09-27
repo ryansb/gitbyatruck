@@ -18,6 +18,7 @@ downloads/
 eggs/
 lib/
 lib64/
+libgit2-0.21.1/
 parts/
 sdist/
 var/
