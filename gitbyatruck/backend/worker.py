@@ -27,7 +27,7 @@ def temp_path(root):
     )
 
 
-def clone_repo(clone_url, path, session):
+def clone_repo(clone_url, path):
     log.info("Cloning repo path={path} clone_url={url}".format(
         path=path,
         url=clone_url)
@@ -38,6 +38,7 @@ def clone_repo(clone_url, path, session):
         bare=True,
     )
     log.info("Clone successful for {}".format(clone_url))
+    session = DBSession()
     ingest_worker(repo, session)
     log.info("Completed repo {}".format(clone_url))
 
@@ -48,21 +49,25 @@ def sanitize_url(orig):
 
 
 def background_ingest(clone_url):
-    session = DBSession()
-    repo_model = session.query(Repository).filter_by(clone_url=clone_url).first()
+    with transaction.manager:
+        repo_model = DBSession.query(Repository).filter_by(
+            clone_url=clone_url).first()
 
-    if repo_model is None:
-        log.warning("Could not retrieve repo {}, bailing out".format(clone_url))
+        if repo_model is None:
+            log.warning("Could not retrieve repo {}, bailing "
+                        "out".format(clone_url))
 
-    log.info("Starting repo name {}".format(clone_url))
-    fpath = temp_path('/tmp/gitbyatruck-data')
-    repo_model.clone_url = sanitize_url(repo_model.clone_url)
-    repo_model.disk_path = fpath
-    fpath = temp_path('/tmp/gitbyatruck-data')
-    log.info("Ingesting repo name {}".format(clone_url))
-    repo_model.ingest_begun_at = datetime.now()
-    transaction.commit()
-    repo_model = session.query(Repository).filter_by(clone_url=clone_url).first()
-    clone_repo(clone_url, fpath, session)
-    repo_model.ingest_finished_at = datetime.now()
-    transaction.commit()
+        log.info("Starting repo name {}".format(clone_url))
+        fpath = temp_path('/tmp/gitbyatruck-data')
+        repo_model.clone_url = sanitize_url(repo_model.clone_url)
+        repo_model.disk_path = fpath
+        fpath = temp_path('/tmp/gitbyatruck-data')
+        log.info("Ingesting repo name {}".format(clone_url))
+        repo_model.ingest_begun_at = datetime.now()
+
+    clone_repo(clone_url, fpath)
+    with transaction.manager:
+        repo_model = DBSession.query(Repository).filter_by(
+            clone_url=clone_url).first()
+        repo_model.ingest_finished_at = datetime.now()
+        transaction.commit()

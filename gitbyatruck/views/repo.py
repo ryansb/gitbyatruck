@@ -4,17 +4,22 @@ from multiprocessing import Pool
 import json
 
 from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPBadRequest, HTTPAccepted
+from pyramid.httpexceptions import HTTPBadRequest, HTTPAccepted, HTTPOk, HTTPNotFound
 
 import transaction
 from sqlalchemy.exc import DBAPIError
+from sqlalchemy import join
 import deform
 import colander
 
 from gitbyatruck.models import (
+    Change,
+    Committer,
     DBSession,
+    File,
+    Knol,
     Repository,
-    )
+)
 from gitbyatruck.backend.worker import background_ingest
 
 
@@ -46,21 +51,88 @@ def start_repo(request):
         raise HTTPBadRequest
     log.info(request.body)
 
-    r = Repository()
-
-    r.name = request.POST.get('name')
-    r.clone_url = request.POST.get('clone_url')
-    r.created_at = datetime.now()
+    clone_url = request.POST.get('clone_url')
 
     with transaction.manager:
+        r = DBSession.query(Repository).filter_by(
+            clone_url=request.POST.get('clone_url')).first()
+
+        if r is not None:
+            # TODO: when a repo already exists, fire off a job to pull from it
+            # and update stats. For now, whatever.
+            return {'link': '/repo/{}'.format(r.id)}
+            raise HTTPOk
+
+        # The repo hasn't already been cloned, so let's save it.
+        r = Repository()
+
+        r.name = request.POST.get('name')
+        r.clone_url = request.POST.get('clone_url')
+        r.created_at = datetime.now()
+
         DBSession.add(r)
 
-    pool.apply_async(background_ingest, (r.clone_url,))
+    pool.apply_async(background_ingest, (clone_url,))
     #background_ingest(request.json['clone_url'])
 
     log.info("Fired async request, done here!")
+    with transaction.manager:
+        r = DBSession.query(Repository).filter_by(
+            clone_url=request.POST.get('clone_url')).first()
+        return {'link': '/repo/{}'.format(r.id)}
+
     raise HTTPAccepted
 
-@view_config(route_name='view', renderer='gitbyatruck:templates/display_repo_stats.mako')
+
+@view_config(route_name='jsonstats',
+             renderer='json')
+def jsonify_stats(request):
+    log.info(request.matchdict['repo_id'])
+    repo = DBSession.query(Repository).filter_by(id=request.matchdict['repo_id']).first()
+    if repo is None:
+        raise HTTPNotFound
+
+    resp = {}
+    if repo.ingest_begun_at:
+        if repo.ingest_finished_at:
+            # how long did the job take?
+            runtime = repo.ingest_finished_at - repo.ingest_begun_at
+        else:
+            # or how long has the job been running
+            runtime = datetime.now() - repo.ingest_begun_at
+        resp['run_seconds'] = runtime.seconds
+
+    if repo.ingest_finished_at:
+        resp['finished'] = True
+    else:
+        resp['finished'] = False
+        # No stats, bail out.
+        return resp
+
+    knowledge = DBSession.query(
+        Knol.knowledge,
+        Committer.name,
+        File.name,
+    ).join(
+        Committer,
+        Knol.committer == Committer.id,
+    ).join(
+        File,
+        Knol.changed_file == File.id,
+    ).all()
+
+    resp['file_listing'] = {}
+
+    for knol in knowledge:
+        listing = resp['file_listing'].get(knol[2], [])
+        listing.append({'k': knol[0], 'c': knol[1]})
+        resp['file_listing'][knol[2]] = listing
+
+    #resp['data'] = list(knowledge)
+    return resp
+
+
+@view_config(route_name='viewstats',
+             renderer='gitbyatruck:templates/display_repo_stats.mako')
 def view_repo(request):
     return {}
