@@ -1,6 +1,12 @@
-from pyramid.response import Response
-from pyramid.view import view_config
+from datetime import datetime
+import logging
+from multiprocessing import Pool
+import json
 
+from pyramid.view import view_config
+from pyramid.httpexceptions import HTTPBadRequest, HTTPAccepted
+
+import transaction
 from sqlalchemy.exc import DBAPIError
 import deform
 import colander
@@ -9,6 +15,12 @@ from gitbyatruck.models import (
     DBSession,
     Repository,
     )
+from gitbyatruck.backend.worker import background_ingest
+
+
+log = logging.getLogger(__name__)
+
+pool = Pool()
 
 
 class NewRepo(colander.MappingSchema):
@@ -27,3 +39,26 @@ def add_repo(request):
             }
 
 
+<<<<<<< HEAD
+=======
+@view_config(route_name='addrepo', renderer='json', request_method='POST')
+def start_repo(request):
+    log.info("Received request {}".format(json.dumps(request.matchdict)))
+
+    if request.json.get('clone_url') is None or request.json.get('name') is None:
+        raise HTTPBadRequest
+    log.info(request.json)
+
+    r = Repository()
+    r.name = request.json['name']
+    r.clone_url = request.json['clone_url']
+    r.created_at = datetime.now()
+    DBSession.add(r)
+    transaction.commit()
+
+    pool.apply_async(background_ingest, (request.json['clone_url'],))
+    #background_ingest(request.json['clone_url'])
+
+    log.info("Fired async request, done here!")
+    raise HTTPAccepted
+>>>>>>> bb043af2cb65221751ea7c1a6473cb5bc018b798

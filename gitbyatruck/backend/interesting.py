@@ -3,6 +3,11 @@
 # License: Affero GPLv3
 
 import re
+import logging
+
+
+log = logging.getLogger(__name__)
+
 
 def interest_callable(suffixes=None, prefixes=None, regexes=None):
     if suffixes is None:
@@ -31,17 +36,17 @@ def interest_callable(suffixes=None, prefixes=None, regexes=None):
 
     fname_filters = []
 
-    fname_filters.append(re.compile('|'.join([s + '$' for s in suffixes])))
+    fname_filters.append(re.compile('.*(' + '|'.join(suffixes) + ')$'))
 
     if prefixes is not None:
-        fname_filters.append(re.compile('|'.join(['^' + p for p in prefixes])))
+        fname_filters.append(re.compile('^(' + '|'.join(prefixes) + ').*'))
 
     if regexes is not None:
         fname_filters.extend([re.compile(r) for r in regexes])
 
     def checkfile(fname):
         for f in fname_filters:
-            if r.match(fname):
+            if f.match(fname):
                 return True
         return False
 

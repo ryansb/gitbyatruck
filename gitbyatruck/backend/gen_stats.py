@@ -12,10 +12,11 @@ from sqlalchemy.orm import sessionmaker
 import transaction
 
 from gitbyatruck.models import Change, DBSession
+from gitbyatruck.backend.interesting import interest_callable
 from gitbyatruck.model_helpers import author_id, file_id, repo_id, _fullname
 
 
-def stat_diff(repo, commit, rid, session, fname_filter=None):
+def stat_diff(repo, commit, rid, session, fname_filter=interest_callable()):
     if not commit.parent_ids:
         return
     short = commit.hex[:8]

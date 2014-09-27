@@ -27,20 +27,19 @@ def temp_path(root):
     )
 
 
-def clone_repo(repo_model, session):
-    log.info("Cloning repo name={name} path={path} clone_url={url}".format(
-        name=repo_model.name,
-        path=repo_model.disk_path,
-        url=repo_model.clone_url)
+def clone_repo(clone_url, path, session):
+    log.info("Cloning repo path={path} clone_url={url}".format(
+        path=path,
+        url=clone_url)
     )
     repo = pygit2.clone_repository(
-        url=repo_model.clone_url,
-        path=repo_model.disk_path,
+        url=clone_url,
+        path=path,
         bare=True,
     )
-    log.info("Clone successful for {}".format(repo.clone_url))
+    log.info("Clone successful for {}".format(clone_url))
     ingest_worker(repo, session)
-    log.info("Completed repo {}".format(repo.clone_url))
+    log.info("Completed repo {}".format(clone_url))
 
 
 def sanitize_url(orig):
@@ -48,17 +47,22 @@ def sanitize_url(orig):
     return orig
 
 
-def async_ingest(name):
+def background_ingest(clone_url):
     session = DBSession()
-    repo_model = session.query(Repository).filter_by(name=name).first()
-    log.info("Starting repo name {}".format(name))
+    repo_model = session.query(Repository).filter_by(clone_url=clone_url).first()
+
+    if repo_model is None:
+        log.warning("Could not retrieve repo {}, bailing out".format(clone_url))
+
+    log.info("Starting repo name {}".format(clone_url))
     fpath = temp_path('/tmp/gitbyatruck-data')
     repo_model.clone_url = sanitize_url(repo_model.clone_url)
     repo_model.disk_path = fpath
     fpath = temp_path('/tmp/gitbyatruck-data')
-    log.info("Ingesting repo name {}".format(name))
+    log.info("Ingesting repo name {}".format(clone_url))
     repo_model.ingest_begun_at = datetime.now()
     transaction.commit()
-    clone_repo(repo_model, session)
+    repo_model = session.query(Repository).filter_by(clone_url=clone_url).first()
+    clone_repo(clone_url, fpath, session)
     repo_model.ingest_finished_at = datetime.now()
     transaction.commit()
