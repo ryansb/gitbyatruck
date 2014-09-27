@@ -19,9 +19,11 @@ class NewRepo(colander.MappingSchema):
 form_schema = NewRepo()
 
 
-@view_config(route_name='addrepo', renderer='gitbyatruck:templates/repos.pt')
+@view_config(route_name='addrepo', renderer='gitbyatruck:templates/git_form.mako')
 def add_repo(request):
     new_repo_form = deform.Form(form_schema, buttons=('clone it',))
     return {'title': 'Repositories',
             'form': new_repo_form,
             }
+
+

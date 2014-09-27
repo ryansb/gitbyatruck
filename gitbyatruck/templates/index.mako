@@ -1,5 +1,5 @@
 <%inherit file="layout.mako"/>
 
-
-Pretty graphs. 
-
+<div class="jumbotron">
+<h1>We've crunched some serious repos, bro </h1>
+</div>
