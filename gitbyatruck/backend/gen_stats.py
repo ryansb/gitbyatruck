@@ -83,10 +83,9 @@ def ingest_repo(repo):
     bar.finish()
 
 
-def ingest_worker(repo):
+def ingest_worker(repo, session):
     """Same as `ingest` but without progress bar"""
     walker = repo.walk(repo.head.get_object().hex, pygit2.GIT_SORT_TIME)
-    session = DBSession()
 
     for commit in walker:
         stat_diff(repo,
