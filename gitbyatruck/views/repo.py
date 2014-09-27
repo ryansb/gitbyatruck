@@ -3,7 +3,6 @@ import logging
 from multiprocessing import Pool
 import json
 
-from pyramid.response import Response
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPBadRequest, HTTPAccepted
 
