@@ -1,6 +1,6 @@
 <%inherit file="layout.mako"/>
 
-<form class="form-horizontal" role="form" action="${request.route_url('addrepo')}" method="post">
+<form class="form-horizontal" role="form" id="git_repo" method="post">
   <div class="form-group">
     <label for="name" class="col-sm-2 control-label">Repo Name</label>
     <div class="col-sm-10">
@@ -20,3 +20,12 @@
   </div>
 </form>
 
+<script>
+$.ajax({
+    type: "POST";
+    url: "${request.route_url('addrepo')}",
+    data: JSON.stringify({clone_url: "", name: ""}),
+    contentType="application/json; charset=uft8",
+    dataType: "json"
+})
+</script>
