@@ -31,11 +31,12 @@ class NewRepo(colander.MappingSchema):
 form_schema = NewRepo()
 
 
-@view_config(route_name='addrepo', renderer='gitbyatruck:templates/git_form.mako')
+@view_config(route_name='addrepo', renderer='gitbyatruck:templates/git_form.pt')
 def add_repo(request):
     new_repo_form = deform.Form(form_schema, buttons=('clone it',))
+    form = new_repo_form.render()
     return {'title': 'Repositories',
-            'form': new_repo_form,
+            'form': form,
             }
 
 
@@ -43,18 +44,21 @@ def add_repo(request):
 def start_repo(request):
     log.info("Received request {}".format(json.dumps(request.matchdict)))
 
-    if request.json.get('clone_url') is None or request.json.get('name') is None:
+
+    if request.POST.get('clone_url') is None or request.POST.get('name') is None:
         raise HTTPBadRequest
-    log.info(request.json)
+    log.info(request.body)
 
     r = Repository()
-    r.name = request.json['name']
-    r.clone_url = request.json['clone_url']
-    r.created_at = datetime.now()
-    DBSession.add(r)
-    transaction.commit()
 
-    pool.apply_async(background_ingest, (request.json['clone_url'],))
+    r.name = request.POST.get('name')
+    r.clone_url = request.POST.get('clone_url')
+    r.created_at = datetime.now()
+
+    with transaction.manager:
+        DBSession.add(r)
+
+    pool.apply_async(background_ingest, (r.clone_url,))
     #background_ingest(request.json['clone_url'])
 
     log.info("Fired async request, done here!")

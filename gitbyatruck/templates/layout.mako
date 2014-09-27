@@ -2,11 +2,15 @@
 <html>
 <head>
 <meta charset ="UTF-8">
-    <title>OR Online</title>
+    <title>Git by a Truck</title>
     <meta name="keywords" content="pyramid web application" />
     <meta name="discription" content="pyramid web application" />
     <link rel="shortcut icon" href="${request.static_path('gitbyatruck:static/favicon.ico')}" />
     <link rel="stylesheet" href="${request.static_path('gitbyatruck:static/css/dist/css/bootstrap.css')}" type="text/css" media="screen" charset="utf-8" />
+    <script type="text/javascript"
+            src="/static/scripts/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript"
+            src="/static/scripts/deform.js"></script>
 </head>
 <body>
 <nav class="navbar navbar-default" role="navigation">
@@ -20,7 +24,7 @@
           </button>
           <ul class="nav nav-pills navbar-nav">
           <li>
-          <a class="navbar-brand" href="/">OR Online</a>
+          <a class="navbar-brand" href="/">Git by a Truck</a>
           </li>
           </ul>
         </div>
