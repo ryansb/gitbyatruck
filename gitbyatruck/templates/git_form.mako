@@ -21,7 +21,7 @@
 </form>
 
 <script type="text/javascript">
-    $("#git_repo").submit(function(event)){
+   $(document).ready(function(){ $("#git_repo").submit(function(event){
 
     /* stop form from submitting normally */
         event.preventDefault();
@@ -34,8 +34,9 @@
         var posting = $.post(url, {name: $('#name').val(), clone_url: $('#clone_url').val()});
         
     /* alerts the results */
-        posting.done(function(data)){
+        posting.done(function(data){
             alert('success');
-        };
-    };
+        };)
+    };)
+};)
 </script>
