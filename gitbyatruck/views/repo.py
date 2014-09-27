@@ -55,8 +55,8 @@ def start_repo(request):
     DBSession.add(r)
     transaction.commit()
 
-    #pool.apply(background_ingest, (request.json['clone_url'],))
-    background_ingest(request.json['clone_url'])
+    pool.apply_async(background_ingest, (request.json['clone_url'],))
+    #background_ingest(request.json['clone_url'])
 
     log.info("Fired async request, done here!")
     raise HTTPAccepted

@@ -25,7 +25,7 @@ Base = declarative_base()
 class Repository(Base):
     __tablename__ = 'repo'
     id = Column(Integer, primary_key=True)
-    name = Column(String(255), unique=True)
+    name = Column(String(255))
     clone_url = Column(String(511), unique=True)
     disk_path = Column(String(511), unique=True)
     created_at = Column(DateTime())
@@ -38,7 +38,7 @@ class Repository(Base):
 class File(Base):
     __tablename__ = 'file'
     id = Column(Integer, primary_key=True)
-    name = Column(String(1024), unique=True)
+    name = Column(String(1024))
     repo = Column(Integer, ForeignKey('repo.id'))
     changes = relationship("Change")
     total_knowledge = Column(Integer)
