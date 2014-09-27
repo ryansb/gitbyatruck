@@ -39,8 +39,6 @@ def add_repo(request):
             }
 
 
-<<<<<<< HEAD
-=======
 @view_config(route_name='addrepo', renderer='json', request_method='POST')
 def start_repo(request):
     log.info("Received request {}".format(json.dumps(request.matchdict)))
@@ -61,4 +59,3 @@ def start_repo(request):
 
     log.info("Fired async request, done here!")
     raise HTTPAccepted
->>>>>>> bb043af2cb65221751ea7c1a6473cb5bc018b798
