@@ -4,9 +4,12 @@
 
 import click
 import pygit2
+from sqlalchemy import engine_from_config
+from pyramid.paster import get_appsettings
 
+from gitbyatruck.models import DBSession
 from gitbyatruck.backend.gen_stats import ingest_repo
-from gitbyatruck.models import create_tables
+from gitbyatruck.scripts.initializedb import main as db_init
 
 
 @click.group()
@@ -15,23 +18,27 @@ def cli():
 
 
 @cli.command(short_help="Destroy database")
-def clean():
-    create_tables()
+@click.option("--config", default="./development.ini", help="Path to ini file")
+def clean(config):
+    db_init(['foo', config])
     click.echo(u'\u2714 Dropped and recreated tables')
 
 
 @cli.command(short_help="Make a new course site from scratch")
 @click.option("--repo-path", help="Path to repo")
-@click.option("--db-url", help="Postgres DB connection string like"
-              " 'postgres://gitter@127.0.0.1/tgit'")
+@click.option("--config", default="./development.ini", help="Path to ini file")
 @click.option("--drop", is_flag=True,
               help="Drop and recreate tables")
 @click.option("--no-stats", is_flag=True,
               help="Skip calculating stats")
 @click.option("--no-ingest", is_flag=True, help="Skip ingesting the repo")
-def run(repo_path, drop, no_ingest, no_stats, db_url):
+def run(repo_path, drop, no_ingest, no_stats, config):
+    settings = get_appsettings(config)
+    engine = engine_from_config(settings, 'sqlalchemy.')
+    DBSession.configure(bind=engine)
+
     if drop:
-        create_tables(db_url)
+        db_init(['foo', config])
         click.echo(u'\u2714 Dropped and recreated tables')
 
     if not repo_path:
@@ -47,7 +54,7 @@ def run(repo_path, drop, no_ingest, no_stats, db_url):
         click.echo(u'\u2717 skipped ingestion')
     else:
         click.echo(u'\u2714 reading stats')
-        ingest_repo(repo, db_url)
+        ingest_repo(repo)
         click.echo(u'\u2714 ingested repo stats')
 
     if no_stats:

@@ -1,20 +1,19 @@
 import os
 import sys
-import transaction
 
-from sqlalchemy import engine_from_config
+from sqlalchemy import engine_from_config, text
 
 from pyramid.paster import (
     get_appsettings,
     setup_logging,
-    )
+)
 
 from pyramid.scripts.common import parse_vars
 
-from ..models import (
+from gitbyatruck.models import (
     DBSession,
     Base,
-    )
+)
 
 
 def usage(argv):
@@ -24,7 +23,10 @@ def usage(argv):
     sys.exit(1)
 
 
-def main(argv=sys.argv):
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
+
     if len(argv) < 2:
         usage(argv)
     config_uri = argv[1]
@@ -33,4 +35,17 @@ def main(argv=sys.argv):
     settings = get_appsettings(config_uri, options=options)
     engine = engine_from_config(settings, 'sqlalchemy.')
     DBSession.configure(bind=engine)
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(engine)
+
+    # load procedures
+    procedure = os.path.join(
+        os.path.split(__file__)[0],
+        '..',
+        'backend',
+        'procedures',
+        'calculate_knowledge.sql',
+    )
+    with open(procedure, 'r') as p:
+        proc = text(p.read())
+        engine.execute(proc)

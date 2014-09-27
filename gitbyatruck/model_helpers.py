@@ -4,6 +4,7 @@
 
 
 from functools import lru_cache
+import transaction
 
 from gitbyatruck.models import Committer, File, Repository
 
@@ -16,18 +17,20 @@ def _fullname(author):
 
 
 @lru_cache(maxsize=4096)
-def author_id(session, fullname):
-    return _find_or_create_author(session, fullname).id
+def author_id(session, fullname, rid):
+    return _find_or_create_author(session, fullname, rid).id
 
 
-def _find_or_create_author(session, fullname):
+def _find_or_create_author(session, fullname, rid):
     user = session.query(Committer).filter_by(name=fullname).first()
     if not user:
         user = Committer()
         user.name = fullname
+        user.repo = rid
         session.add(user)
-        session.commit()
-        session.refresh(user)
+        transaction.commit()
+        return session.query(Committer).filter_by(name=fullname,
+                                                  repo=rid).first()
     return user
 
 
@@ -44,8 +47,8 @@ def find_or_create_file(session, name, rid):
         f.repo = rid
         f.name = name
         session.add(f)
-        session.commit()
-        session.refresh(f)
+        transaction.commit()
+        return session.query(File).filter_by(name=name, repo=rid).first()
     return f
 
 
@@ -61,8 +64,6 @@ def find_or_create_repo(session, name):
         repo = Repository()
         repo.name = name
         session.add(repo)
-        session.commit()
-        session.refresh(repo)
+        transaction.commit()
+        return session.query(Repository).filter_by(name=name).first()
     return repo
-
-
