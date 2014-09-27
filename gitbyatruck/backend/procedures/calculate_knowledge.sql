@@ -17,28 +17,33 @@ CREATE OR REPLACE FUNCTION ingest_change() RETURNS TRIGGER AS $new_change$
             UPDATE knol SET knowledge = knowledge + adjustment
                 WHERE committer = NEW.committer
                 AND changed_file = NEW.changed_file
+                AND repo = NEW.repo
                 AND individual = TRUE;
             if found THEN
                 -- The update worked, do nothing
             ELSE
                 -- Update didn't work, insert new node
-                INSERT INTO knol(committer, changed_file, knowledge, individual) VALUES (
+                INSERT INTO knol(committer, repo, changed_file, knowledge, individual) VALUES (
                     NEW.committer,
+                    NEW.repo,
                     NEW.changed_file,
                     adjustment,
                     TRUE
                 );
             END IF;
             UPDATE file SET total_knowledge = total_knowledge + adjustment
-                WHERE id = NEW.changed_file;
+                WHERE id = NEW.changed_file
+                AND repo = NEW.repo;
         END IF;
         IF adjustment < 0 THEN
             -- Destroy knowledge for developers who have worked on the file by destroying 
             UPDATE knol SET knowledge = knowledge * (1.0 - adjustment/knowledge)
                 WHERE changed_file = NEW.changed_file
+                AND repo = NEW.repo
                 AND knowledge > 0;
             UPDATE file SET total_knowledge = total_knowledge - adjustment
-                WHERE id = NEW.changed_file;
+                WHERE id = NEW.changed_file
+                AND repo = NEW.repo;
         END IF;
 
 
@@ -52,9 +57,11 @@ CREATE OR REPLACE FUNCTION ingest_change() RETURNS TRIGGER AS $new_change$
         UPDATE knol SET knowledge = knowledge - new_knowledge
             WHERE changed_file = NEW.changed_file
             AND committer != NEW.committer
+            AND repo = NEW.repo
             AND individual = TRUE;
         UPDATE knol SET knowledge = knowledge + new_knowledge
             WHERE changed_file = NEW.changed_file
+            AND repo = NEW.repo
             AND committer = NEW.committer;
         RETURN NULL;
     END;
