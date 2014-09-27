@@ -19,7 +19,7 @@ from sqlalchemy.orm import (
     scoped_session,
     sessionmaker,
     relationship,
-    )
+)
 from zope.sqlalchemy import ZopeTransactionExtension
 
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
@@ -33,7 +33,9 @@ class Repository(Base):
     clone_url = Column(String(511), unique=True)
     disk_path = Column(String(511), unique=True)
     created_at = Column(DateTime())
-    ttl = Column(Integer) # TTL in hours
+    ttl = Column(Integer)  # TTL in hours
+    ingest_begun_at = Column(DateTime())
+    ingest_finished_at = Column(DateTime())
     files = relationship("File")
 
 
