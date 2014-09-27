@@ -7,7 +7,7 @@ from gitbyatruck.models import (
     )
 
 
-@view_config(route_name='home', renderer='gitbyatruck:templates/home.pt')
+@view_config(route_name='home', renderer='gitbyatruck:templates/index.mako')
 def home(request):
     repos = DBSession.query(Repository).all()
     return {'title': 'Welcome to gitbyatruck',
