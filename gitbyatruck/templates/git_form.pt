@@ -1,4 +1,0 @@
-<p>${structure: form}</p>
-<script type="text/javascript">
-    deform.load()
-</script>

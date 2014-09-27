@@ -31,12 +31,9 @@ class NewRepo(colander.MappingSchema):
 form_schema = NewRepo()
 
 
-@view_config(route_name='addrepo', renderer='gitbyatruck:templates/git_form.pt')
+@view_config(route_name='addrepo', renderer='gitbyatruck:templates/git_form.mako')
 def add_repo(request):
-    new_repo_form = deform.Form(form_schema, buttons=('clone it',))
-    form = new_repo_form.render()
     return {'title': 'Repositories',
-            'form': form,
             }
 
 
@@ -63,3 +60,7 @@ def start_repo(request):
 
     log.info("Fired async request, done here!")
     raise HTTPAccepted
+
+@view_config(route_name='view', renderer='gitbyatruck:templates/display_repo_stats.mako')
+def view_repo(request):
+    return {}
