@@ -116,6 +116,11 @@ def jsonify_stats(request):
         # No stats, bail out.
         return resp
 
+    resp['stats'] = _stat_repo(repo.id)
+    return resp
+
+
+def _stat_repo(rid):
     knowledge = DBSession.query(
         Knol.knowledge,
         Committer.name,
@@ -128,21 +133,26 @@ def jsonify_stats(request):
         File,
         Knol.changed_file == File.id,
     ).filter(
-        Knol.repo == repo.id
+        Knol.repo == rid
     ).all()
 
-    resp['file_listing'] = {}
+    stats = {}
 
     for knol in knowledge:
-        listing = resp['file_listing'].get(knol[2], [])
+        listing = stats.get(knol[2], [])
         listing.append({'k': knol[0], 'c': knol[1]})
-        resp['file_listing'][knol[2]] = listing
-
-    #resp['data'] = list(knowledge)
-    return resp
+        stats[knol[2]] = listing
+    return stats
 
 
 @view_config(route_name='viewstats',
              renderer='gitbyatruck:templates/display_repo_stats.mako')
 def view_repo(request):
-    return {}
+    repo = DBSession.query(Repository).filter(
+        Repository.id == request.matchdict['repo_id']).first()
+    if repo is None:
+        log.info("Could not find repo with ID {}".format(
+            request.matchdict['repo_id']))
+        raise HTTPNotFound
+    resp = {'repo': repo, 'stats': _stat_repo(repo.id)}
+    return resp

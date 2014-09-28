@@ -1,5 +1,6 @@
 <%inherit file="layout.mako"/>
 
+<<<<<<< HEAD
 
 <div class="chart"></div>
 <script>
@@ -13,3 +14,15 @@
 </script>
 
 
+=======
+<div class="jumbotron">
+<h1>Stats for ${repo.name}</h1>
+<h3>From ${repo.clone_url}</h3>
+</div>
+<div class="row">
+<div class="col-sm-2"
+<ul>
+</ul>
+</div>
+</div>
+>>>>>>> 170062d2c9403a0984e9fc6a69bf72ed0b40d9b5
