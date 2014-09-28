@@ -21,22 +21,28 @@
 </form>
 
 <script type="text/javascript">
-   $(document).ready(function(){ $("#git_repo").submit(function(event){
+   $("#git_repo").submit(function(event){
 
     /* stop form from submitting normally */
         event.preventDefault();
 
     /*get some values from elements on page */
         var $form = $(this),
-            url = $form.attr('action');
-
+            route = $form.attr('action');
+        var name = $('#name').val();
+        var clone_url = $('#clone_url').val();
     /* send the data using post request */
-        var posting = $.post(url, {name: $('#name').val(), clone_url: $('#clone_url').val()});
         
-    /* alerts the results */
-        posting.done(function(data){
-            alert('success');
-        };)
-    };)
-};)
+    /* ajax post request */
+        $.ajax({
+            type: "POST",
+            url: route,
+            data: JSON.stringify({name: name, clone_url: clone_url}), 
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+        })
+        .done(function(msg){
+            alert("Data Saved: " + msg);
+        });
+    });
 </script>

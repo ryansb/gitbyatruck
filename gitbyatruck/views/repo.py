@@ -49,16 +49,7 @@ def add_repo(request):
 def start_repo(request):
     log.info("Received request {}".format(json.dumps(request.matchdict)))
 
-    print('\n')
-    print('\n')
-    print('\n')
-    print(request.json_body)
-    print('\n')
-    print('\n')
-    print('\n')
-
-    """
-    if request.POST.get('clone_url') is None or (request.POST.get('name')
+    if request.json('clone_url') is None or (request.json('name')
                                                  is None):
         raise HTTPBadRequest
     log.info(request.body)
@@ -93,8 +84,6 @@ def start_repo(request):
         return {'link': '/repo/{}'.format(r.id)}
 
     raise HTTPAccepted
-    """
-    return {}
 
 
 @view_config(route_name='jsonstats',

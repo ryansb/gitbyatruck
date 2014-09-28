@@ -11,6 +11,18 @@
             src="/static/scripts/jquery-1.4.2.min.js"></script>
     <script type="text/javascript"
             src="/static/scripts/deform.js"></script>
+    <script src="${request.static_path('gitbyatruck:static/js/d3.js')}" charset="utf-8"></script>
+    <style>
+
+    .chart div {
+      font: 10px sans-serif;
+      background-color: steelblue;
+      text-align: right;
+      padding: 3px;
+      margin: 1px;
+      color: white;
+    }
+    </style>
 </head>
 <body>
 <nav class="navbar navbar-default" role="navigation">
