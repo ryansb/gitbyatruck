@@ -1,10 +1,9 @@
 <%inherit file="layout.mako"/>
 
-<<<<<<< HEAD
 
 <div class="chart"></div>
 <script>
-    var data = [4, 8, 15, 16, 23, 42]
+    var data = ${repo.stats|n}
     var chart = d3.select(".chart");
     var bar = chart.selectAll("div");
     var barUpdate = bar.data(data);
@@ -14,7 +13,6 @@
 </script>
 
 
-=======
 <div class="jumbotron">
 <h1>Stats for ${repo.name}</h1>
 <h3>From ${repo.clone_url}</h3>
@@ -25,4 +23,3 @@
 </ul>
 </div>
 </div>
->>>>>>> 170062d2c9403a0984e9fc6a69bf72ed0b40d9b5

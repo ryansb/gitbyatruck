@@ -22,6 +22,7 @@ libgit2-0.21.1/
 parts/
 sdist/
 var/
+*/static/*
 *.egg-info/
 .installed.cfg
 *.egg

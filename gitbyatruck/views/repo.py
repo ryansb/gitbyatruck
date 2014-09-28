@@ -81,7 +81,7 @@ def start_repo(request):
     with transaction.manager:
         r = DBSession.query(Repository).filter_by(
             clone_url=request.POST.get('clone_url')).first()
-        return {'link': '/repo/{}'.format(r.id)}
+        return {'link': '/repo_stats/{}'.format(r.id)}
 
     raise HTTPAccepted
 

@@ -40,6 +40,15 @@
             data: JSON.stringify({name: name, clone_url: clone_url}), 
             contentType: "application/json; charset=utf-8",
             dataType: "json",
+            success:function(response){
+                var link = $(body).data('link');
+                if link {
+                    window.location= link;
+                }
+                else{
+                    window.location = '/'
+                }
+            }
         })
         .done(function(msg){
             alert("Data Saved: " + msg);
