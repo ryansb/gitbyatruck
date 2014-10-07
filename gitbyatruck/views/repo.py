@@ -82,7 +82,7 @@ def start_repo(request):
     with transaction.manager:
         r = DBSession.query(Repository).filter_by(
             clone_url=request.json_body.get('clone_url')).first()
-        return HTTPFound(request.route_url('jsonstats', id=r.id))
+        return {'link': '/repo/{}'.format(r.id)}
 
     raise HTTPAccepted
 
@@ -94,7 +94,7 @@ def jsonify_stats(request):
         Repository.id == request.matchdict['id']).first()
     if repo is None:
         log.info("Could not find repo with ID {}".format(
-            request.matchdict['repo_id']))
+            request.matchdict['id']))
         raise HTTPNotFound
 
     resp = {}
@@ -118,8 +118,7 @@ def jsonify_stats(request):
         return resp
 
     resp['stats'] = _stat_repo(repo.id)
-    #don't forget to jsonify it
-    return json.dumps(resp)
+    return resp
 
 def _stat_repo(rid):
     knowledge = DBSession.query(
