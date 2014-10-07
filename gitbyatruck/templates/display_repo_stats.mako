@@ -12,7 +12,6 @@
     barEnter.text(function(d){return d;});
 </script>
 
-
 <div class="jumbotron">
 <h1>Stats for ${repo.name}</h1>
 <h3>From ${repo.clone_url}</h3>

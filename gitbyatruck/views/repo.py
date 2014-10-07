@@ -8,11 +8,11 @@ from pyramid.httpexceptions import (
     HTTPBadRequest,
     HTTPAccepted,
     HTTPOk,
+    HTTPFound,
     HTTPNotFound,
 )
 
 import transaction
-import deform
 import colander
 
 from gitbyatruck.models import (
@@ -49,16 +49,17 @@ def add_repo(request):
 def start_repo(request):
     log.info("Received request {}".format(json.dumps(request.matchdict)))
 
-    if request.json('clone_url') is None or (request.json('name')
+    if request.json_body.get('clone_url') is None or (request.json_body.get('name')
                                                  is None):
         raise HTTPBadRequest
     log.info(request.body)
 
-    clone_url = request.POST.get('clone_url')
+
+    clone_url = request.json_body.get('clone_url')
 
     with transaction.manager:
         r = DBSession.query(Repository).filter_by(
-            clone_url=request.POST.get('clone_url')).first()
+            clone_url=request.json_body.get('clone_url')).first()
 
         if r is not None:
             # TODO: when a repo already exists, fire off a job to pull from it
@@ -68,8 +69,8 @@ def start_repo(request):
         # The repo hasn't already been cloned, so let's save it.
         r = Repository()
 
-        r.name = request.POST.get('name')
-        r.clone_url = request.POST.get('clone_url')
+        r.name = request.json_body.get('name')
+        r.clone_url = request.json_body.get('clone_url')
         r.created_at = datetime.now()
 
         DBSession.add(r)
@@ -80,8 +81,8 @@ def start_repo(request):
     log.info("Fired async request, done here!")
     with transaction.manager:
         r = DBSession.query(Repository).filter_by(
-            clone_url=request.POST.get('clone_url')).first()
-        return {'link': '/repo_stats/{}'.format(r.id)}
+            clone_url=request.json_body.get('clone_url')).first()
+        return HTTPFound(request.route_url('jsonstats', id=r.id))
 
     raise HTTPAccepted
 
@@ -90,7 +91,7 @@ def start_repo(request):
              renderer='json')
 def jsonify_stats(request):
     repo = DBSession.query(Repository).filter(
-        Repository.id == request.matchdict['repo_id']).first()
+        Repository.id == request.matchdict['id']).first()
     if repo is None:
         log.info("Could not find repo with ID {}".format(
             request.matchdict['repo_id']))
@@ -117,8 +118,8 @@ def jsonify_stats(request):
         return resp
 
     resp['stats'] = _stat_repo(repo.id)
-    return resp
-
+    #don't forget to jsonify it
+    return json.dumps(resp)
 
 def _stat_repo(rid):
     knowledge = DBSession.query(

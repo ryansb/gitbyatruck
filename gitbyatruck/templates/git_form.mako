@@ -31,7 +31,6 @@
             route = $form.attr('action');
         var name = $('#name').val();
         var clone_url = $('#clone_url').val();
-    /* send the data using post request */
         
     /* ajax post request */
         $.ajax({
@@ -40,18 +39,12 @@
             data: JSON.stringify({name: name, clone_url: clone_url}), 
             contentType: "application/json; charset=utf-8",
             dataType: "json",
-            success:function(response){
-                var link = $(body).data('link');
-                if link {
-                    window.location= link;
-                }
-                else{
-                    window.location = '/'
+            success: function(response){
+                if (response){
+                window.location.href = response.link;
                 }
             }
-        })
-        .done(function(msg){
-            alert("Data Saved: " + msg);
         });
+
     });
 </script>
