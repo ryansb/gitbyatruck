@@ -27,12 +27,14 @@ def clean(config):
 @cli.command(short_help="Make a new course site from scratch")
 @click.option("--repo-path", help="Path to repo")
 @click.option("--config", default="./development.ini", help="Path to ini file")
+@click.option("--progress", is_flag=True,
+              help="Show progress bar")
 @click.option("--drop", is_flag=True,
               help="Drop and recreate tables")
 @click.option("--no-stats", is_flag=True,
               help="Skip calculating stats")
 @click.option("--no-ingest", is_flag=True, help="Skip ingesting the repo")
-def run(repo_path, drop, no_ingest, no_stats, config):
+def run(repo_path, drop, no_ingest, no_stats, progress, config):
     settings = get_appsettings(config)
     engine = engine_from_config(settings, 'sqlalchemy.')
     DBSession.configure(bind=engine)
@@ -54,7 +56,7 @@ def run(repo_path, drop, no_ingest, no_stats, config):
         click.echo(u'\u2717 skipped ingestion')
     else:
         click.echo(u'\u2714 reading stats')
-        ingest_repo(repo)
+        ingest_repo(repo, verbose=progress)
         click.echo(u'\u2714 ingested repo stats')
 
     if no_stats:
