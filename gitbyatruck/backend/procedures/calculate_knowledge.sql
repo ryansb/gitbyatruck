@@ -23,7 +23,7 @@ CREATE OR REPLACE FUNCTION ingest_change() RETURNS TRIGGER AS $new_change$
                 -- The update worked, do nothing
             ELSE
                 -- Update didn't work, insert new node
-                INSERT INTO knol(committer, repo, changed_file, knowledge, individual) VALUES (
+                INSERT INTO knol (committer, repo, changed_file, knowledge, individual) VALUES (
                     NEW.committer,
                     NEW.repo,
                     NEW.changed_file,
@@ -31,7 +31,7 @@ CREATE OR REPLACE FUNCTION ingest_change() RETURNS TRIGGER AS $new_change$
                     TRUE
                 );
             END IF;
-            UPDATE file SET total_knowledge = total_knowledge + adjustment
+            UPDATE files SET total_knowledge = total_knowledge + adjustment
                 WHERE id = NEW.changed_file
                 AND repo = NEW.repo;
         END IF;
@@ -41,7 +41,7 @@ CREATE OR REPLACE FUNCTION ingest_change() RETURNS TRIGGER AS $new_change$
                 WHERE changed_file = NEW.changed_file
                 AND repo = NEW.repo
                 AND knowledge > 0;
-            UPDATE file SET total_knowledge = total_knowledge - adjustment
+            UPDATE files SET total_knowledge = total_knowledge - adjustment
                 WHERE id = NEW.changed_file
                 AND repo = NEW.repo;
         END IF;
