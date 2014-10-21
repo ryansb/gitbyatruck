@@ -36,7 +36,7 @@ class Repository(Base):
 
 
 class File(Base):
-    __tablename__ = 'file'
+    __tablename__ = 'files'
     id = Column(Integer, primary_key=True)
     name = Column(String(1024))
     repo = Column(Integer, ForeignKey('repo.id'))
@@ -58,7 +58,7 @@ class Change(Base):
     repo = Column(Integer, ForeignKey('repo.id'))
     short_hash = Column(String(8))
     commit_time = Column(Integer)
-    changed_file = Column(Integer, ForeignKey('file.id'))
+    changed_file = Column(Integer, ForeignKey('files.id'))
     committer = Column(Integer, ForeignKey('committer.id'))
     added = Column(Integer)
     deleted = Column(Integer)
@@ -68,7 +68,7 @@ class Knol(Base):
     __tablename__ = 'knol'
     id = Column(Integer, primary_key=True)
     repo = Column(Integer, ForeignKey('repo.id'))
-    changed_file = Column(Integer, ForeignKey('file.id'))
+    changed_file = Column(Integer, ForeignKey('files.id'))
     committer = Column(Integer, ForeignKey('committer.id'))
     knowledge = Column(Float)
     individual = Column(Boolean)
