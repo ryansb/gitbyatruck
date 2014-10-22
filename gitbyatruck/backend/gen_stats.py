@@ -48,13 +48,11 @@ def stat_diff(repo, commit, rid, fname_filter=interest_callable()):
                 continue
             # otherwise keep going
 
-            fid = file_id(path, rid)
-
             c = Change(
                 # non unique. One change object per file changed in a commit
                 short_hash=short,
                 repo=rid,
-                changed_file=fid,
+                changed_file=path,
                 commit_time=commit.commit_time,
                 committer=author,
                 added=patch.additions,
