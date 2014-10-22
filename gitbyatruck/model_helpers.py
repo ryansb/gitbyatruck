@@ -40,29 +40,6 @@ def _find_or_create_author(fullname, rid):
         Committer.repo == rid).first()
 
 
-@lru_cache(maxsize=8192)
-def file_id(name, rid):
-    log.debug("looking for file {}".format(name))
-    f = find_or_create_file(name, rid)
-    return f.id
-
-
-def find_or_create_file(name, rid):
-    f = DBSession.query(File).filter(
-        File.name == name,
-        File.repo == rid,
-    ).first()
-    if f:
-        return f
-    with transaction.manager:
-        f = File()
-        f.repo = rid
-        f.name = name
-        DBSession.add(f)
-
-    return DBSession.query(File).filter_by(name=name, repo=rid).first()
-
-
 @lru_cache(maxsize=32)
 def repo_id(clone_url):
     repo = find_or_create_repo(clone_url)

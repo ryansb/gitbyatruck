@@ -40,7 +40,6 @@ class File(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(1024))
     repo = Column(Integer, ForeignKey('repo.id'))
-    changes = relationship("Change")
     total_knowledge = Column(Integer)
 
 
@@ -58,7 +57,7 @@ class Change(Base):
     repo = Column(Integer, ForeignKey('repo.id'))
     short_hash = Column(String(8))
     commit_time = Column(Integer)
-    changed_file = Column(Integer, ForeignKey('files.id'))
+    changed_file = Column(String(1024))
     committer = Column(Integer, ForeignKey('committer.id'))
     added = Column(Integer)
     deleted = Column(Integer)
