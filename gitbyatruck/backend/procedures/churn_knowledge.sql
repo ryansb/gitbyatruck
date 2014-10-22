@@ -6,7 +6,6 @@ CREATE OR REPLACE FUNCTION churn_knowledge(
     committer_id integer
 ) RETURNS void AS $$
 DECLARE
-    adjustment          integer;
     churn               integer;
     churn_constant      float;
     new_knowledge       float;
