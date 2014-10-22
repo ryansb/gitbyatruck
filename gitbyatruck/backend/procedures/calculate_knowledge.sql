@@ -43,7 +43,7 @@ CREATE OR REPLACE FUNCTION ingest_change() RETURNS TRIGGER AS $new_change$
         END IF;
 
         -- Now for the fun part, to share knowledge with other developers
-        SELECT churn_knowledge(
+        PERFORM churn_knowledge(
             NEW.added,
             NEW.deleted,
             NEW.changed_file,

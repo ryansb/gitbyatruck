@@ -2,8 +2,8 @@ CREATE OR REPLACE FUNCTION churn_knowledge(
     added integer,
     deleted integer,
     changed_fid integer,
-    repo integer,
-    committer integer
+    repo_id integer,
+    committer_id integer
 ) RETURNS void AS $$
 DECLARE
     adjustment          integer;
@@ -23,13 +23,13 @@ BEGIN
     new_knowledge = churn * churn_constant;
     UPDATE knol SET knowledge = knowledge - new_knowledge
         WHERE changed_file = changed_fid
-        AND committer != committer
-        AND repo = repo
+        AND committer != committer_id
+        AND repo = repo_id
         AND individual = TRUE;
     UPDATE knol SET knowledge = knowledge + new_knowledge
         WHERE changed_file = changed_fid
-        AND repo = repo
-        AND committer = committer;
+        AND repo = repo_id
+        AND committer = committer_id;
 END;
 
 $$ LANGUAGE plpgsql;
