@@ -39,13 +39,15 @@ def main(argv=None):
     Base.metadata.create_all(engine)
 
     # load procedures
-    procedure = os.path.join(
-        os.path.split(__file__)[0],
-        '..',
-        'backend',
-        'procedures',
-        'calculate_knowledge.sql',
-    )
-    with open(procedure, 'r') as p:
-        proc = text(p.read())
-        engine.execute(proc)
+    for path, _, files in os.walk(
+        os.path.join(
+            os.path.split(__file__)[0],
+            '..',
+            'backend',
+            'procedures'
+        )
+    ):
+        for f in files:
+            with open(os.path.join(path, f), 'r') as p:
+                procedure = text(p.read())
+                engine.execute(procedure)
