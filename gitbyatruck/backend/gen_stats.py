@@ -7,6 +7,7 @@ import pygit2
 import logging
 
 from progressbar import ProgressBar
+from progressbar.widgets import Bar, Percentage, Timer
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -14,7 +15,7 @@ import transaction
 
 from gitbyatruck.models import Change, DBSession
 from gitbyatruck.backend.interesting import interest_callable
-from gitbyatruck.model_helpers import author_id, file_id, repo_id, _fullname
+from gitbyatruck.model_helpers import author_id, repo_id, _fullname
 
 
 log = logging.getLogger(__name__)
@@ -73,7 +74,7 @@ def ingest_repo(repo, verbose=False):
             count += 1
 
     walker = repo.walk(repo.head.get_object().hex, pygit2.GIT_SORT_TIME)
-    bar = ProgressBar(maxval=count)
+    bar = ProgressBar(maxval=count, widgets=[Percentage(), ' ', Bar(), ' ', Timer()])
 
     verbose and bar.start()
     for commit in walker:
