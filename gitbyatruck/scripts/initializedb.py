@@ -45,7 +45,11 @@ def main(argv=None):
         'backend',
         'procedures'
     )
-    files = ['churn_knowledge.sql', 'calculate_knowledge.sql']
+    files = [
+        'file_id.sql',
+        'churn_knowledge.sql',
+        'calculate_knowledge.sql',
+    ]
     for f in files:
         with open(os.path.join(prefix, f), 'r') as p:
             procedure = text(p.read())
