@@ -1,8 +1,6 @@
 CREATE OR REPLACE FUNCTION ingest_change() RETURNS TRIGGER AS $new_change$
     DECLARE
         adjustment          integer;
-        churn               integer;
-        new_knowledge       float;
     BEGIN
         --
         -- Only runs on insert
@@ -45,12 +43,12 @@ CREATE OR REPLACE FUNCTION ingest_change() RETURNS TRIGGER AS $new_change$
         END IF;
 
         -- Now for the fun part, to share knowledge with other developers
-        churn_knowledge(
+        SELECT churn_knowledge(
             NEW.added,
             NEW.deleted,
             NEW.changed_file,
             NEW.repo,
-            NEW.committer)
+            NEW.committer);
 
         RETURN NULL;
     END;
