@@ -9,8 +9,6 @@ import logging
 from progressbar import ProgressBar
 from progressbar.widgets import Bar, Percentage, Timer
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 import transaction
 
 from gitbyatruck.models import Change, DBSession
