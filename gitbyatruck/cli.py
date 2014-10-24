@@ -23,8 +23,10 @@ def clean(config):
     db_init(['foo', config])
     click.echo(u'\u2714 Dropped and recreated tables')
 
+
 def _set_suffixes(ctx, param, value):
-    return value.split(',') or None
+    if value:
+        return value.split(',')
 
 
 @cli.command(short_help="Make a new course site from scratch")
