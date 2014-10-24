@@ -23,6 +23,33 @@ def clean(config):
     db_init(['foo', config])
     click.echo(u'\u2714 Dropped and recreated tables')
 
+_default_suffixes = [
+    ".c",
+    ".cc",
+    ".cpp",
+    ".css",
+    ".go",
+    ".h",
+    ".hs",
+    ".html",
+    ".java",
+    ".js",
+    ".less",
+    ".mak",
+    ".php",
+    ".pl",
+    ".py",
+    ".r",
+    ".rb",
+    ".sass",
+    ".sh",
+    ".zsh",
+]
+
+def _set_suffixes(ctx, param, value):
+    if value:
+        return value.split(',')
+
 
 @cli.command(short_help="Make a new course site from scratch")
 @click.option("--repo-path", help="Path to repo")
@@ -33,8 +60,10 @@ def clean(config):
               help="Drop and recreate tables")
 @click.option("--no-stats", is_flag=True,
               help="Skip calculating stats")
+@click.option("--suffixes", callback=_set_suffixes,
+              help="Interesting file suffixes separated by commas")
 @click.option("--no-ingest", is_flag=True, help="Skip ingesting the repo")
-def run(repo_path, drop, no_ingest, no_stats, progress, config):
+def run(repo_path, drop, no_ingest, no_stats, progress, config, suffixes):
     settings = get_appsettings(config)
     engine = engine_from_config(settings, 'sqlalchemy.')
     DBSession.configure(bind=engine)
@@ -56,7 +85,7 @@ def run(repo_path, drop, no_ingest, no_stats, progress, config):
         click.echo(u'\u2717 skipped ingestion')
     else:
         click.echo(u'\u2714 reading stats')
-        ingest_repo(repo, verbose=progress)
+        ingest_repo(repo, verbose=progress, suffixes=suffixes)
         click.echo(u'\u2714 ingested repo stats')
 
     if no_stats:

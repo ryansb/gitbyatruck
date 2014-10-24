@@ -65,7 +65,7 @@ def hex_generator(repo):
         yield c.hex
 
 
-def ingest_repo(repo, verbose=False):
+def ingest_repo(repo, verbose=False, suffixes=None):
     count = 0
     if verbose:
         for _ in repo.walk(repo.head.get_object().hex, pygit2.GIT_SORT_TIME):
@@ -79,6 +79,7 @@ def ingest_repo(repo, verbose=False):
         stat_diff(repo,
                   commit,
                   rid=repo_id(repo.path[:-6]),
+                  fname_filter=interest_callable(suffixes=suffixes)
                   )
         verbose and bar.update(bar.currval + 1)
 
