@@ -3,23 +3,25 @@
 # License: Affero GPLv3
 
 
-import pygit2
 import logging
+from time import time
 
+import pygit2
 from progressbar import ProgressBar
 from progressbar.widgets import Bar, Percentage, Timer
 
-import transaction
-
-from gitbyatruck.models import Change, DBSession
+from gitbyatruck.models import Change
 from gitbyatruck.backend.interesting import interest_callable
 from gitbyatruck.model_helpers import author_id, repo_id, _fullname
 
 
 log = logging.getLogger(__name__)
 
+DBSession = None
+
 
 def stat_diff(repo, commit, rid, fname_filter=interest_callable()):
+    global DBSession
     if not commit.parent_ids:
         return
     short = commit.hex[:8]
@@ -33,30 +35,29 @@ def stat_diff(repo, commit, rid, fname_filter=interest_callable()):
         return
 
     author = author_id(_fullname(commit.author), rid)
-    with transaction.manager:
-        for patch in diff:
-            if not (patch.additions + patch.deletions):
-                continue
-            if patch.new_file_path != patch.old_file_path:
-                print("Path change! we don't handle those")
+    for patch in diff:
+        if not (patch.additions + patch.deletions):
+            continue
+        if patch.new_file_path != patch.old_file_path:
+            print("Path change! we don't handle those")
 
-            path = patch.new_file_path or patch.old_file_path
+        path = patch.new_file_path or patch.old_file_path
 
-            if fname_filter is not None and fname_filter(path) is False:
-                # bail if the file isn't one we care about
-                continue
-            # otherwise keep going
+        if fname_filter is not None and fname_filter(path) is False:
+            # bail if the file isn't one we care about
+            continue
+        # otherwise keep going
 
-            c = Change(
-                # non unique. One change object per file changed in a commit
-                short_hash=short,
-                repo=rid,
-                changed_file=path,
-                commit_time=commit.commit_time,
-                committer=author,
-                added=patch.additions,
-                deleted=patch.deletions)
-            DBSession.add(c)
+        c = Change(
+            # non unique. One change object per file changed in a commit
+            short_hash=short,
+            repo=rid,
+            changed_file=path,
+            commit_time=commit.commit_time,
+            committer=author,
+            added=patch.additions,
+            deleted=patch.deletions)
+        DBSession.add(c)
 
 
 def hex_generator(repo):
@@ -65,23 +66,37 @@ def hex_generator(repo):
         yield c.hex
 
 
-def ingest_repo(repo, verbose=False, suffixes=None):
+def ingest_repo(repo, verbose=False, suffixes=None, session=None):
+    global DBSession
+    DBSession = session
+
     count = 0
     if verbose:
         for _ in repo.walk(repo.head.get_object().hex, pygit2.GIT_SORT_TIME):
             count += 1
 
     walker = repo.walk(repo.head.get_object().hex, pygit2.GIT_SORT_TIME)
-    bar = ProgressBar(maxval=count, widgets=[Percentage(), ' ', Bar(), ' ', Timer()])
+    bar = ProgressBar(maxval=count, widgets=[Percentage(),
+                                             ' ',
+                                             Bar(),
+                                             ' ',
+                                             Timer()]
+                      )
 
     verbose and bar.start()
+    interval_seconds = 90
+    flush_after = time() + interval_seconds
     for commit in walker:
         stat_diff(repo,
                   commit,
                   rid=repo_id(repo.path[:-6]),
                   fname_filter=interest_callable(suffixes=suffixes)
                   )
+        if time() > flush_after:
+            DBSession.flush()
+            flush_after = time() + interval_seconds
         verbose and bar.update(bar.currval + 1)
+    DBSession.flush()
 
     verbose and bar.finish()
 
