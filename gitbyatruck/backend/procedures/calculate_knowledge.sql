@@ -8,7 +8,15 @@ CREATE OR REPLACE FUNCTION ingest_change() RETURNS TRIGGER AS $new_change$
         -- TODO: handle UPDATE and DELETE
         -- result is ignored since this is an AFTER trigger
         --
-        SELECT maybe_file(NEW.changed_file, NEW.repo) INTO changed_fid;
+        INSERT INTO files (repo, name) (
+            -- see also file_id.sql. By not having it a separate
+            -- function call it shaves ~15% off the call time.
+            SELECT NEW.repo AS repo, NEW.changed_file AS name
+            WHERE NOT EXISTS (
+                SELECT 1 FROM files
+                WHERE repo = NEW.repo AND name = NEW.changed_file
+            )
+        ) RETURNING id INTO changed_fid;
 
         adjustment = NEW.added - NEW.deleted;
         IF adjustment > 0 THEN

@@ -23,12 +23,11 @@ BEGIN
     UPDATE knol SET knowledge = knowledge - new_knowledge
         WHERE changed_file = changed_fid
         AND committer != committer_id
-        AND repo = repo_id
-        AND individual = TRUE;
+        AND repo = repo_id;
     UPDATE knol SET knowledge = knowledge + new_knowledge
         WHERE changed_file = changed_fid
-        AND repo = repo_id
-        AND committer = committer_id;
+        AND committer = committer_id
+        AND repo = repo_id;
 END;
 
 $$ LANGUAGE plpgsql;
