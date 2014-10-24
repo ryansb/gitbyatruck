@@ -5,6 +5,7 @@
 import click
 import pygit2
 from sqlalchemy import engine_from_config
+from sqlalchemy.orm import create_session
 from pyramid.paster import get_appsettings
 
 from gitbyatruck.models import DBSession
@@ -63,7 +64,11 @@ def run(repo_path, drop, no_ingest, no_stats, progress, config, suffixes):
         click.echo(u'\u2717 skipped ingestion')
     else:
         click.echo(u'\u2714 reading stats')
-        ingest_repo(repo, verbose=progress, suffixes=suffixes)
+        ingest_repo(repo,
+                    verbose=progress,
+                    suffixes=suffixes,
+                    session=create_session(bind=engine),
+                    )
         click.echo(u'\u2714 ingested repo stats')
 
     if no_stats:
