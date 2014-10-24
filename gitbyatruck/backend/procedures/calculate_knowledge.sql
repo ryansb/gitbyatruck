@@ -16,18 +16,16 @@ CREATE OR REPLACE FUNCTION ingest_change() RETURNS TRIGGER AS $new_change$
             UPDATE knol SET knowledge = knowledge + adjustment
                 WHERE committer = NEW.committer
                 AND changed_file = changed_fid
-                AND repo = NEW.repo
-                AND individual = TRUE;
+                AND repo = NEW.repo;
             if found THEN
                 -- The update worked, do nothing
             ELSE
                 -- Update didn't work, insert new node
-                INSERT INTO knol (committer, repo, changed_file, knowledge, individual) VALUES (
+                INSERT INTO knol (committer, repo, changed_file, knowledge) VALUES (
                     NEW.committer,
                     NEW.repo,
                     changed_fid,
-                    adjustment,
-                    TRUE
+                    adjustment
                 );
             END IF;
             UPDATE files SET total_knowledge = total_knowledge + adjustment

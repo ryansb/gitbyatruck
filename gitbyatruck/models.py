@@ -3,7 +3,6 @@
 # License: Affero GPLv3
 
 from sqlalchemy import (
-    Boolean,
     Column,
     DateTime,
     Float,
@@ -71,4 +70,3 @@ class Knol(Base):
     changed_file = Column(Integer, ForeignKey('files.id'))
     committer = Column(Integer, ForeignKey('committer.id'))
     knowledge = Column(Float)
-    individual = Column(Boolean)
