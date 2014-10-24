@@ -23,32 +23,8 @@ def clean(config):
     db_init(['foo', config])
     click.echo(u'\u2714 Dropped and recreated tables')
 
-_default_suffixes = [
-    ".c",
-    ".cc",
-    ".cpp",
-    ".css",
-    ".go",
-    ".h",
-    ".hs",
-    ".html",
-    ".java",
-    ".js",
-    ".less",
-    ".mak",
-    ".php",
-    ".pl",
-    ".py",
-    ".r",
-    ".rb",
-    ".sass",
-    ".sh",
-    ".zsh",
-]
-
 def _set_suffixes(ctx, param, value):
-    if value:
-        return value.split(',')
+    return value.split(',') or None
 
 
 @cli.command(short_help="Make a new course site from scratch")
