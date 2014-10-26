@@ -64,7 +64,7 @@ def start_repo(request):
         if r is not None:
             # TODO: when a repo already exists, fire off a job to pull from it
             # and update stats. For now, whatever.
-            return {'link': '/repo/{}'.format(r.id)}
+            return {'link': '/repo/%s'%r.name}
 
         # The repo hasn't already been cloned, so let's save it.
         r = Repository()
@@ -82,7 +82,7 @@ def start_repo(request):
     with transaction.manager:
         r = DBSession.query(Repository).filter_by(
             clone_url=request.json_body.get('clone_url')).first()
-        return {'link': '/repo/{}'.format(r.id)}
+        return {'link': '/repo/%s'%r.name}
 
     raise HTTPAccepted
 
@@ -149,10 +149,10 @@ def _stat_repo(rid):
              renderer='gitbyatruck:templates/display_repo_stats.mako')
 def view_repo(request):
     repo = DBSession.query(Repository).filter(
-        Repository.id == request.matchdict['repo_id']).first()
+        Repository.name == request.matchdict['repo_name']).first()
     if repo is None:
-        log.info("Could not find repo with ID {}".format(
-            request.matchdict['repo_id']))
+        log.info("Could not find repo with name %s"%
+            request.matchdict['repo_name'])
         raise HTTPNotFound
     resp = {'repo': repo, 'stats': _stat_repo(repo.id)}
     return resp
