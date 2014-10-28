@@ -1,5 +1,6 @@
 -- Only run CREATE EXTENSION the first time you need stats
 -- CREATE EXTENSION pg_stat_statements;
+-- see http://www.postgresql.org/docs/9.3/static/pgstatstatements.html
 \x -- Extended display
 
 -- Get the five functions the most time is spent on
