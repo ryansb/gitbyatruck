@@ -7,7 +7,7 @@ import logging
 from functools import lru_cache
 import transaction
 
-from gitbyatruck.models import Committer, File, Repository, DBSession
+from gitbyatruck.models import Committer, Repository, DBSession
 
 
 log = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ def _find_or_create_author(fullname, rid):
         Committer.repo == rid).first()
 
 
-@lru_cache(maxsize=32)
+@lru_cache(maxsize=16)
 def repo_id(clone_url):
     repo = find_or_create_repo(clone_url)
     return repo.id
