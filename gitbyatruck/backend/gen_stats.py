@@ -10,14 +10,13 @@ import pygit2
 from progressbar import ProgressBar
 from progressbar.widgets import Bar, Percentage, Timer
 
-from gitbyatruck.models import Change
+from gitbyatruck.models import DBSession, Change
 from gitbyatruck.backend.interesting import interest_callable
 from gitbyatruck.model_helpers import author_id, repo_id, _fullname
 
 
 log = logging.getLogger(__name__)
 
-DBSession = None
 
 
 def stat_diff(repo, commit, rid, fname_filter=interest_callable()):

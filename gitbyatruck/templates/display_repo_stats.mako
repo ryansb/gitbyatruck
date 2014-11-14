@@ -15,6 +15,9 @@
 <div class="jumbotron">
 <h1>Stats for ${repo.name}</h1>
 <h3>From ${repo.clone_url}</h3>
+% for stat in stats:
+    <li> ${stat} </li>
+% endfor
 </div>
 <div class="row">
 <div class="col-sm-2"
