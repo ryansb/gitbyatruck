@@ -136,6 +136,7 @@ def _stat_repo(rid):
         Knol.repo == rid
     ).all()
 
+
     stats = {}
 
     for knol in knowledge:
