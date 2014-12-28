@@ -3,7 +3,7 @@
 
 <div class="chart"></div>
 <script>
-    var data = $(body).data('repo.stats');
+    var data = $(body).data('stats');
     var chart = d3.select(".chart");
     var bar = chart.selectAll("div");
     var barUpdate = bar.data(data);
@@ -16,6 +16,7 @@
 <h1>Stats for ${repo.name}</h1>
 <h3>From ${repo.clone_url}</h3>
 </div>
+${stats}
 <div class="row">
 <div class="col-sm-2"
 <ul>
