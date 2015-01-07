@@ -7,6 +7,7 @@ import logging
 from time import time
 
 import pygit2
+import transaction
 from progressbar import ProgressBar
 from progressbar.widgets import Bar, Percentage, Timer
 
@@ -20,7 +21,6 @@ log = logging.getLogger(__name__)
 
 
 def stat_diff(repo, commit, rid, fname_filter=interest_callable()):
-    global DBSession
     if not commit.parent_ids:
         return
     short = commit.hex[:8]
@@ -56,7 +56,11 @@ def stat_diff(repo, commit, rid, fname_filter=interest_callable()):
             committer=author,
             added=patch.additions,
             deleted=patch.deletions)
+
         DBSession.add(c)
+
+    #let's make sure to actually commit things to the db
+    transaction.commit()
 
 
 def hex_generator(repo):
