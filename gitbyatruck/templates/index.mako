@@ -7,7 +7,7 @@
 <div class="col-sm-2"
 <ul>
 % for r in repos:
-    <li><a href="/repo/${r.id}">${r.name}</a> -- ${r.clone_url}</li>
+    <li><a href="/repo/${r.name}">${r.name}</a> -- ${r.clone_url}</li>
 % endfor
 </ul>
 </div>

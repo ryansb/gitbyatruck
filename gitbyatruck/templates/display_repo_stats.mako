@@ -3,7 +3,7 @@
 
 <div class="chart"></div>
 <script>
-    var data = $(body).data('repo.stats');
+    var data = $(body).data('stats');
     var chart = d3.select(".chart");
     var bar = chart.selectAll("div");
     var barUpdate = bar.data(data);
@@ -19,6 +19,7 @@
     <li> ${stat} </li>
 % endfor
 </div>
+${stats}
 <div class="row">
 <div class="col-sm-2"
 <ul>

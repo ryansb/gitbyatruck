@@ -20,6 +20,6 @@ def main(global_config, **settings):
     config.add_route('home', '/')
     config.add_route('addrepo', '/git_form')
     config.add_route('jsonstats', '/repo_stats/{repo_id}')
-    config.add_route('viewstats', '/repo/{repo_id}')
+    config.add_route('viewstats', '/repo/{repo_name}')
     config.scan()
     return config.make_wsgi_app()

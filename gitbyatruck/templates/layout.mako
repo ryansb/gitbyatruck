@@ -6,7 +6,7 @@
     <meta name="keywords" content="pyramid web application" />
     <meta name="discription" content="pyramid web application" />
     <link rel="shortcut icon" href="${request.static_path('gitbyatruck:static/favicon.ico')}" />
-    <link rel="stylesheet" href="${request.static_path('gitbyatruck:static/css/bootstrap.css')}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="${request.static_path('gitbyatruck:static/css/dist/css/bootstrap.css')}" type="text/css" media="screen" charset="utf-8" />
     <script type="text/javascript"
             src="/static/scripts/jquery-1.4.2.min.js"></script>
     <script type="text/javascript"
