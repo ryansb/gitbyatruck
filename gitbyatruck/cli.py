@@ -4,10 +4,9 @@
 
 import click
 import pygit2
-from sqlalchemy import engine_from_config
-from sqlalchemy.orm import create_session
-from pyramid.paster import get_appsettings
+import sqlalchemy
 
+from gitbyatruck import persist
 from gitbyatruck.models import DBSession
 from gitbyatruck.backend.gen_stats import ingest_repo
 from gitbyatruck.scripts.initializedb import main as db_init
@@ -17,17 +16,17 @@ from gitbyatruck.scripts.initializedb import main as db_init
 def cli():
     pass
 
+connection_string = 'postgres:///example'
 
 @cli.command(short_help="Destroy database")
 @click.option("--config", default="./development.ini", help="Path to ini file")
 def clean(config):
-    db_init(['foo', config])
+    db = sqlalchemy.create_engine(connection_string)
+    engine = db.connect()
+    persist.metadata.bind = engine
+    persist.metadata.drop_all()
+    persist.metadata.create_all()
     click.echo(u'\u2714 Dropped and recreated tables')
-
-
-def _set_suffixes(ctx, param, value):
-    if value:
-        return value.split(',')
 
 
 @cli.command(short_help="Make a new course site from scratch")
@@ -39,7 +38,6 @@ def _set_suffixes(ctx, param, value):
               help="Drop and recreate tables")
 @click.option("--no-stats", is_flag=True,
               help="Skip calculating stats")
-@click.option("--suffixes", callback=_set_suffixes,
               help="Interesting file suffixes separated by commas")
 @click.option("--no-ingest", is_flag=True, help="Skip ingesting the repo")
 def run(repo_path, drop, no_ingest, no_stats, progress, config, suffixes):

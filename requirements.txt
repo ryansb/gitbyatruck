@@ -1,10 +1,10 @@
 cffi>=0.8.6
-SQLAlchemy>=0.9.7
+SQLAlchemy>=1.0.0
 SQLAlchemy-Utils>=0.26.15
 psycopg2>=2.5.4
 click>=3.3
 progressbar33>=2.4
-pygit2==0.21.1
+#pygit2==0.21.1
 pyramid>=1.5.1
 pyramid_chameleon>=0.3
 pyramid_debugtoolbar>=2.2
