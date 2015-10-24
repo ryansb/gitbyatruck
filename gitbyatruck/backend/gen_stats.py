@@ -11,6 +11,7 @@ from progressbar import ProgressBar
 from progressbar.widgets import Bar, Percentage, Timer
 
 from gitbyatruck.models import Change
+from gitbyatruck import persist
 from gitbyatruck.backend.interesting import interest_callable
 from gitbyatruck.model_helpers import author_id, repo_id, _fullname
 
@@ -20,13 +21,16 @@ log = logging.getLogger(__name__)
 DBSession = None
 
 
-def stat_diff(repo, commit, rid, fname_filter=interest_callable()):
-    global DBSession
+def stat_diff(repo, commit, clone_url, session, fname_filter=interest_callable()):
+    """
+    repo: libgit2 repo object
+    commit: commit
+    clone_url: clone URL for the repo, used as pkey for repos
+    """
     if not commit.parent_ids:
         return
-    short = commit.hex[:8]
+    short = commit.hex
     log.debug("Parsing commit {} repo_id={}".format(short, rid))
-    diff = None
     try:
         diff = repo.diff(commit.hex, commit.hex + '^', context_lines=0)
     except:
@@ -35,8 +39,10 @@ def stat_diff(repo, commit, rid, fname_filter=interest_callable()):
         return
 
     author = author_id(_fullname(commit.author), rid)
+
+    patches = []
     for patch in diff:
-        if not (patch.additions + patch.deletions):
+        if not (patch.additions or patch.deletions):
             continue
         if patch.new_file_path != patch.old_file_path:
             print("Path change! we don't handle those")
@@ -47,17 +53,19 @@ def stat_diff(repo, commit, rid, fname_filter=interest_callable()):
             # bail if the file isn't one we care about
             continue
         # otherwise keep going
+        patches.append(
+            (
+                short,
+                patch.additions,
+                patch.deletions,
+                patch.new_file_path,
+                patch.old_file_path,
+                {}
+            )
+        )
 
-        c = Change(
-            # non unique. One change object per file changed in a commit
-            short_hash=short,
-            repo=rid,
-            changed_file=path,
-            commit_time=commit.commit_time,
-            committer=author,
-            added=patch.additions,
-            deleted=patch.deletions)
-        DBSession.add(c)
+    session.execute(persist.diffs.insert().values(patches))
+
 
 
 def hex_generator(repo):
