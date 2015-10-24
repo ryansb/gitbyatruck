@@ -38,7 +38,6 @@ def clean(config):
               help="Drop and recreate tables")
 @click.option("--no-stats", is_flag=True,
               help="Skip calculating stats")
-              help="Interesting file suffixes separated by commas")
 @click.option("--no-ingest", is_flag=True, help="Skip ingesting the repo")
 def run(repo_path, drop, no_ingest, no_stats, progress, config, suffixes):
     settings = get_appsettings(config)
