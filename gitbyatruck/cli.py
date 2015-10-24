@@ -5,9 +5,10 @@
 import click
 import pygit2
 import sqlalchemy
+import asyncio
 
 from gitbyatruck import persist
-from gitbyatruck.backend.gen_stats import ingest_repo
+from gitbyatruck.backend.new_ingest import ingest_repo
 
 
 @click.group()
@@ -38,6 +39,7 @@ def clean(dburi):
               help="Skip calculating stats")
 @click.option("--no-ingest", is_flag=True, help="Skip ingesting the repo")
 def run(repo_path, dburi, drop, no_ingest, no_stats, progress):
+    loop = asyncio.get_event_loop()
     db = sqlalchemy.create_engine(dburi)
     engine = db.connect()
     persist.metadata.bind = engine
@@ -60,10 +62,11 @@ def run(repo_path, dburi, drop, no_ingest, no_stats, progress):
         click.echo(u'\u2717 skipped ingestion')
     else:
         click.echo(u'\u2714 reading stats')
-        ingest_repo(repo,
-                    'git://foo/test',
-                    session=engine,
-                    )
+        loop.run_until_complete(ingest_repo(engine,
+                                            repo,
+                                            'git://foo/test',
+                                            ))
         click.echo(u'\u2714 ingested repo stats')
 
     click.echo(u'\u2714 first knowledge estimate complete')
+    loop.close()
