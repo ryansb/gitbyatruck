@@ -7,21 +7,18 @@ import pygit2
 import sqlalchemy
 
 from gitbyatruck import persist
-from gitbyatruck.models import DBSession
 from gitbyatruck.backend.gen_stats import ingest_repo
-from gitbyatruck.scripts.initializedb import main as db_init
 
 
 @click.group()
 def cli():
     pass
 
-connection_string = 'postgres:///example'
-
 @cli.command(short_help="Destroy database")
-@click.option("--config", default="./development.ini", help="Path to ini file")
-def clean(config):
-    db = sqlalchemy.create_engine(connection_string)
+@click.option("--dburi", default="postgres:///example",
+              help="Database connection string")
+def clean(dburi):
+    db = sqlalchemy.create_engine(dburi)
     engine = db.connect()
     persist.metadata.bind = engine
     persist.metadata.drop_all()
@@ -31,7 +28,8 @@ def clean(config):
 
 @cli.command(short_help="Make a new course site from scratch")
 @click.option("--repo-path", help="Path to repo")
-@click.option("--config", default="./development.ini", help="Path to ini file")
+@click.option("--dburi", default="postgres:///example",
+              help="Database connection string")
 @click.option("--progress", is_flag=True,
               help="Show progress bar")
 @click.option("--drop", is_flag=True,
@@ -39,13 +37,14 @@ def clean(config):
 @click.option("--no-stats", is_flag=True,
               help="Skip calculating stats")
 @click.option("--no-ingest", is_flag=True, help="Skip ingesting the repo")
-def run(repo_path, drop, no_ingest, no_stats, progress, config, suffixes):
-    settings = get_appsettings(config)
-    engine = engine_from_config(settings, 'sqlalchemy.')
-    DBSession.configure(bind=engine)
+def run(repo_path, dburi, drop, no_ingest, no_stats, progress):
+    db = sqlalchemy.create_engine(dburi)
+    engine = db.connect()
+    persist.metadata.bind = engine
 
     if drop:
-        db_init(['foo', config])
+        persist.metadata.drop_all()
+        persist.metadata.create_all()
         click.echo(u'\u2714 Dropped and recreated tables')
 
     if not repo_path:
@@ -62,13 +61,9 @@ def run(repo_path, drop, no_ingest, no_stats, progress, config, suffixes):
     else:
         click.echo(u'\u2714 reading stats')
         ingest_repo(repo,
-                    verbose=progress,
-                    suffixes=suffixes,
-                    session=create_session(bind=engine),
+                    'git://foo/test',
+                    session=engine,
                     )
         click.echo(u'\u2714 ingested repo stats')
-
-    if no_stats:
-        return
 
     click.echo(u'\u2714 first knowledge estimate complete')
