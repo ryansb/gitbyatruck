@@ -3,6 +3,7 @@
 # diffs: commit_hash old_name new_name added removed other
 # repos: clone_url name
 # authors: username display emails
+import collections
 import sqlalchemy
 from sqlalchemy import Column, Integer, Text, DateTime, Boolean, ForeignKey
 from sqlalchemy.dialects.postgresql import JSON, ARRAY
@@ -31,6 +32,22 @@ commits = sqlalchemy.Table(
     Column('parents', ARRAY(Text)),
     Column('other', JSON))
 
+Commit = collections.namedtuple("Commit", (
+    'hash',
+    'repo_url',
+    'committer_name',
+    'committer_email',
+    'author_name',
+    'author_email',
+    'commit_date',
+    'author_date',
+    'message',
+    'is_merge',
+    'parent',
+    'parents',
+    'other',
+))
+
 diffs = sqlalchemy.Table(
     "diffs", metadata,
     Column('commit_hash', Text, ForeignKey(commits.c.hash), nullable=False),
@@ -39,6 +56,18 @@ diffs = sqlalchemy.Table(
     Column('file_name', Text),
     Column('old_name', Text),
     Column('other', JSON))
+
+Diff = collections.namedtuple("Diff", (
+    'commit_hash',
+    'added',
+    'removed',
+    'file_name',
+    'old_name',
+    'other',
+))
+
+LineStats = collections.namedtuple("LineStats", ['unknown', 'added', 'deleted'])
+
 
 authors = sqlalchemy.Table(
     "authors", metadata,
