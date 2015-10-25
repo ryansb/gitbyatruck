@@ -25,42 +25,60 @@ async def create_diff(repo, commit):
 
 async def stat_commit(session, repo, clone_url, commit):
     """
-    Ingest a patch from a repo and put it into postgres
-    """
-    if not (patch.additions + patch.deletions):
-        return
-
-    session.execute(persist.diffs.insert().values([(
-        commit.hex,
-        patch.additions,
-        patch.deletions,
-        patch.new_file_path,
-        patch.old_file_path,
-        {}
-    )]))
-
-
-async def stat_diff(session, repo, commit):
-    """
-    Coroutine used in the libgit2 tree walker
+    repo: libgit2 repo object
+    commit: commit
+    clone_url: clone URL for the repo, used as pkey for repos
     """
     if not commit.parent_ids:
-        return False
-    log.debug("Parsing commit {0} repo_id={1}".format(
-        commit.hex[:8],
-        repo.path))
+        return
+    short = commit.hex[8:]
+    commit_id = commit.hex
+
+    c = persist.Commit(
+        hash=commit_id,
+        repo_url=clone_url,
+        committer_name=commit.committer.name,
+        committer_email=commit.committer.email,
+        commit_date=datetime.fromtimestamp(commit.committer.time + commit.committer.offset * 60),
+        author_name=commit.committer.name,
+        author_email=commit.committer.email,
+        author_date=datetime.fromtimestamp(commit.author.time + commit.author.offset * 60),
+        message=commit.message.strip(),
+        is_merge=len(commit.parent_ids) > 1,
+        parent=commit.parent_ids[0].hex,
+        parents=[i.hex for i in commit.parent_ids],
+        other={}
+    )
+    session.execute(persist.commits.insert().values(c))
+
+    log.debug("Parsing commit {}".format(short))
     diff = await create_diff(repo, commit)
     if diff is None:
         return False
-    ingest_cr = partial(ingest_patch, session, commit)
-    crs = [ingest_cr(patch) for patch in diff]
-    await asyncio.gather(*crs)
-    return True
 
+    patches = []
+    for patch in diff:
+        stats = persist.LineStats(*patch.line_stats)
+        if not (stats.added or stats.deleted):
+            continue
+
+        # otherwise keep going
+        patches.append(
+            persist.Diff(
+                commit_id,
+                stats.added,
+                stats.deleted,
+                patch.delta.new_file.path,
+                patch.delta.old_file.path,
+                {},
+            )
+        )
+    if len(patches):
+        session.execute(persist.diffs.insert().values(patches))
 
 async def ingest_repo(session, repo, clone_url):
     walker = repo.walk(repo.head.get_object().hex, pygit2.GIT_SORT_TIME)
-    stat_cr = partial(stat_diff, session, repo)  # Partial for the stat_diff function
+    stat_cr = partial(stat_commit, session, repo, clone_url)  # Partial for the stat_commit function
     crs = [stat_cr(commit) for commit in walker]  # Create a bunch of corountines
     start_time = time.time()
     count = 0

@@ -29,6 +29,8 @@ def clean(dburi):
 
 @cli.command(short_help="Make a new course site from scratch")
 @click.option("--repo-path", help="Path to repo")
+@click.option("--repo-name", default="test project",
+              help="Display name for project")
 @click.option("--dburi", default="postgres:///example",
               help="Database connection string")
 @click.option("--progress", is_flag=True,
