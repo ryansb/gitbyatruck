@@ -88,6 +88,6 @@ def run(repo_path, dburi, drop, no_ingest, no_stats, progress, repo_name):
 def get_clone_url(repo_path):
     remote = 'origin'
     import subprocess
-    out = subprocess.check_output(['git', 'remote', 'show', remote, '-n'])
+    out = subprocess.check_output(['git', 'remote', 'show', remote, '-n'], cwd=repo_path)
     fetch_line = [l for l in out.decode().splitlines() if 'Fetch URL' in l][0]
     return fetch_line.split(':', 1)[-1].strip()
