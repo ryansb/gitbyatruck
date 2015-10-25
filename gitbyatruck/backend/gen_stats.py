@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 DBSession = None
 
 
-def stat_diff(repo, commit, clone_url, session, fname_filter=interest_callable()):
+def stat_diff(session, repo, commit):
     """
     repo: libgit2 repo object
     commit: commit

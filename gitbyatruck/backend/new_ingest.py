@@ -1,5 +1,7 @@
 # -*- coding; utf-8 -*-
 import asyncio
+import sqlalchemy
+from datetime import datetime
 import logging
 import pygit2
 import time
@@ -21,8 +23,7 @@ async def create_diff(repo, commit):
             commit.hex, commit.parent_ids))
         return None
 
-
-async def ingest_patch(session, commit, patch):
+async def stat_commit(session, repo, clone_url, commit):
     """
     Ingest a patch from a repo and put it into postgres
     """
