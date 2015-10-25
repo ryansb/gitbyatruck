@@ -38,7 +38,7 @@ def clean(dburi):
 @click.option("--no-stats", is_flag=True,
               help="Skip calculating stats")
 @click.option("--no-ingest", is_flag=True, help="Skip ingesting the repo")
-def run(repo_path, dburi, drop, no_ingest, no_stats, progress):
+def run(repo_path, dburi, drop, no_ingest, no_stats, progress, repo_name):
     loop = asyncio.get_event_loop()
     db = sqlalchemy.create_engine(dburi)
     engine = db.connect()
@@ -52,6 +52,14 @@ def run(repo_path, dburi, drop, no_ingest, no_stats, progress):
     if not repo_path:
         repo_path = '/home/ryansb/code/hflossk/'
 
+    clone_url = get_clone_url(repo_path)
+
+    engine.execute(
+        persist.repos.insert().values(
+            (clone_url, 'test_repo', {})
+        )
+    )
+
     repo = pygit2.init_repository(repo_path)
 
     # \u2714 is a check mark
@@ -61,12 +69,23 @@ def run(repo_path, dburi, drop, no_ingest, no_stats, progress):
     if no_ingest:
         click.echo(u'\u2717 skipped ingestion')
     else:
-        click.echo(u'\u2714 reading stats')
-        loop.run_until_complete(ingest_repo(engine,
-                                            repo,
-                                            'git://foo/test',
-                                            ))
+        click.echo(u'\u2714 reading repository')
+        loop.run_until_complete(
+            ingest_repo(
+                engine,
+                repo,
+                clone_url,
+            )
+        )
         click.echo(u'\u2714 ingested repo stats')
 
     click.echo(u'\u2714 first knowledge estimate complete')
     loop.close()
+
+
+def get_clone_url(repo_path):
+    remote = 'origin'
+    import subprocess
+    out = subprocess.check_output(['git', 'remote', 'show', remote, '-n'])
+    fetch_line = [l for l in out.decode().splitlines() if 'Fetch URL' in l][0]
+    return fetch_line.split(':', 1)[-1].strip()
