@@ -26,15 +26,15 @@ async def ingest_patch(session, commit, patch):
     """
     Ingest a patch from a repo and put it into postgres
     """
-    if not (patch.additions + patch.deletions):
+    if not (patch.line_stats[1] + patch.line_stats[2]):
         return
 
     session.execute(persist.diffs.insert().values([(
         commit.hex,
-        patch.additions,
-        patch.deletions,
-        patch.new_file_path,
-        patch.old_file_path,
+        patch.line_stats[1],
+        patch.line_stats[2],
+        patch.delta.new_file.path,
+        patch.delta.old_file.path,
         {}
     )]))
 
